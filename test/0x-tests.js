@@ -1,3 +1,4 @@
+/*
 import {
     assetDataUtils,
     BigNumber,
@@ -72,11 +73,11 @@ contract("Card", accounts => {
     assert.equal(supply, 0, 'Token Supply Should be 0.');
     assert.equal(accountBalance, 0, 'Number of Account Token Types Should be 0.');
     assert.equal(indexes.length, 0, 'Tokens Owned Should be 0.');
-    /*
+
     console.log('Supply:' + supply);
     console.log('Balance: ' + accountBalance);
     console.log(tokensOwned);
-    */
+
 
     var mintCoffeeTxHash = await cardInstance.mint(1, accounts[0]);                 // Mint NFT token with ID = 1 for account 0
 
@@ -253,3 +254,4 @@ contract("Card", accounts => {
     pe.stop();
   });
 });
+*/

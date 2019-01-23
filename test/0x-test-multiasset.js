@@ -14,7 +14,7 @@ import { Web3Wrapper } from '@0x/web3-wrapper';
 import { MnemonicWalletSubprovider } from '@0x/subproviders';
 import { getContractAddressesForNetworkOrThrow } from '@0x/contract-addresses';
 
-import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook} from "../client/src/utils/request-helper";
+import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByName, getFilteredRequestBookByName} from "../client/src/utils/request-helper";
 import { getTokens } from "../client/src/utils/contract-helper";
 
 const Card = artifacts.require("./Card.sol");
@@ -72,30 +72,30 @@ contract("Offers", accounts => {
     const client4coffeId = 71;
 
     // 2 coffee & 3 water & 1 specialIrnBruTokenId
-    await cardInstance.mint(10, requester);
-    await cardInstance.mint(11, requester);
-    await cardInstance.mint(40, requester);
-    await cardInstance.mint(41, requester);
-    await cardInstance.mint(42, requester);
-    await cardInstance.mint(specialIrnBruTokenId, requester);
+    await cardInstance.mint(10, requester, 'MilkMan', 'Coffee', 'Coffee10', 'https://www.brian-coffee-spot.com/wp-content/uploads/2015/10/Thumbnail-The-Milkman-DSC_1913t-150x200.jpg');
+    await cardInstance.mint(11, requester, 'MilkMan', 'Coffee', 'Coffee11','https://www.brian-coffee-spot.com/wp-content/uploads/2015/10/Thumbnail-The-Milkman-DSC_1913t-150x200.jpg');
+    await cardInstance.mint(40, requester, 'MilkMan', 'Water', 'Water40', 'image');
+    await cardInstance.mint(41, requester, 'MilkMan', 'Water', 'Water41', 'image');
+    await cardInstance.mint(42, requester, 'MilkMan', 'Water', 'Water42', 'image');
+    await cardInstance.mint(specialIrnBruTokenId, requester, 'IrnBru', 'IrnBruSpecial', 'Orange','image');
 
     // 1 coke
-    await cardInstance.mint(cokeTokenId, client2, new BigNumber(4));
+    await cardInstance.mint(cokeTokenId, client2, 'Coca Cola', 'Coke', 'Coke60','Image');
 
     // 3 tea & 3 milk
-    await cardInstance.mint(20, client3);
-    await cardInstance.mint(21, client3);
-    await cardInstance.mint(22, client3);
-    await cardInstance.mint(client3milkId, client3);
-    await cardInstance.mint(32, client3);
-    await cardInstance.mint(33, client3);
+    await cardInstance.mint(20, client3, 'Costa', 'Tea', 'Tea20', 'teaImage');
+    await cardInstance.mint(21, client3, 'Costa', 'Tea', 'Tea21', 'teaImage');
+    await cardInstance.mint(22, client3, 'Costa', 'Tea', 'Tea22', 'teaImage');
+    await cardInstance.mint(client3milkId, client3, 'MilkMan', 'Milk', 'Milk31', 'milkImage');
+    await cardInstance.mint(32, client3, 'MilkMan', 'Milk', 'Milk32', 'milkImage');
+    await cardInstance.mint(33, client3, 'MilkMan', 'Milk', 'Milk33', 'milkImage');
 
     // 3 irn bru & 1 milk
-    await cardInstance.mint(50, client4);
-    await cardInstance.mint(51, client4);
-    await cardInstance.mint(52, client4);
-    await cardInstance.mint(client4milkId, client4);
-    await cardInstance.mint(client4coffeId, client4);
+    await cardInstance.mint(50, client4, 'IrnBru', 'IrnBru', 'IrnBru50','image');
+    await cardInstance.mint(51, client4, 'IrnBru', 'IrnBru', 'IrnBru51','image');
+    await cardInstance.mint(52, client4, 'IrnBru', 'IrnBru', 'IrnBru52','image');
+    await cardInstance.mint(client4milkId, client4, 'MilkMan', 'Milk', 'Milk30', 'milkImage');
+    await cardInstance.mint(client4coffeId, client4, 'MilkMan', 'Coffee', 'Coffee71', 'coffeeImage');
 
     const milkRequestAmount = 1;
     // SET UP COMPLETE

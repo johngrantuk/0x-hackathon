@@ -9,7 +9,9 @@ const addRequest = async(RequestsArray, Request) => {
     requestTokenAddress: Request.requestTokenAddress,
     requestTokenId: Request.requestTokenId,
     requestAmount: Request.requestAmount,
-    requestSwaps: Request.swaps
+    requestSwaps: Request.swaps,
+    tokenOwner: Request.tokenOwner,
+    tokenType: Request.tokenType
   });
 
   return id;
@@ -50,6 +52,31 @@ const getRequest = async(RequestsArray, Id) => {
   return request;
 }
 
+const getRequestByName = async(RequestsArray, Owner, TokenType) => {
+
+  var requestResults = RequestsArray.filter(request => {
+    return request.tokenOwner === Owner && request.tokenType === TokenType;
+  });
+
+  if(requestResults.length < 1){
+    requestResults = null;
+  }
+
+  return requestResults;
+}
+
+const getFilteredRequestBookByName = async(RequestsArray, Tokens) => {
+  var requests = RequestsArray.filter(request => {
+    var i;
+    for(i = 0;i < Tokens.length;i++){
+      if(Tokens[i].tokenOwner === request.tokenOwner && Tokens[i].tokenType === request.tokenType)
+        return true;
+    }
+  });
+
+  return requests;
+}
+
 const getFilteredRequestBook = async(RequestsArray, Tokens) => {
   var request = RequestsArray.filter(request => {
     var i;
@@ -83,9 +110,11 @@ const getFilteredOffersBook = async(OffersArray, RequestId) => {
 module.exports = {
   addRequest,
   getRequest,
+  getRequestByName,
   getFilteredRequestBook,
   addOffer,
-  getFilteredOffersBook
+  getFilteredOffersBook,
+  getFilteredRequestBookByName
 }
 //export addRequest;
 //export getOrder;

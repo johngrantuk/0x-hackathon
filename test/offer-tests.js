@@ -1,3 +1,4 @@
+/*
 import {
     assetDataUtils,
     BigNumber,
@@ -205,7 +206,7 @@ contract("Offers", accounts => {
     for(var key in requesterTokens){
       console.log(key + ':' + requesterTokens[key])
     }
-    */
+
 
     assert.equal(requesterTokens['length'], 6, 'Requester should have 6 tokens');
     assert.equal(requesterTokens[specialIrnBruTokenId], 1, 'Requester should have the Special Irn Bru token');
@@ -570,4 +571,4 @@ contract("Offers", accounts => {
 
   //});
 
-});
+//});
