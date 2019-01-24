@@ -42,3 +42,17 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+# Description
+Treasure Hunt wallet with built in trading of NFT tokens via 0x.
+Relayer extended to accept 'Requests' for NFT tokens so user can complete a challenge. Negotiate NFT exchange.
+
+## Relayer
+Based on the 0x-starter-project partial relayer.
+Extended to accept requests for trade.
+
+## Contract ERC721x
+
+## tests
+Full range of tests for MultiAsset transfer.
+https://github.com/0xProject/0x-starter-project/blob/master/src/scenarios/fill_order_multi_asset.ts#L19

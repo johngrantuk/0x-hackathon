@@ -1,8 +1,18 @@
-
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
 
 const addRequest = async(RequestsArray, Request) => {
 
-  var id = web3.utils.sha3(Request.requestTokenAddress + Request.requestTokenId + Request.requestAmount + Date.now());
+  //var id = web3.utils.sha3(Request.requestTokenAddress + Request.requestTokenId + Request.requestAmount + Date.now());
+  var id = (Request.requestTokenAddress + Request.requestTokenId + Request.requestAmount + Date.now()).hashCode();
 
   RequestsArray.push({
     id: id,
@@ -66,9 +76,13 @@ const getRequestByName = async(RequestsArray, Owner, TokenType) => {
 }
 
 const getFilteredRequestBookByName = async(RequestsArray, Tokens) => {
+  //console.log(Tokens)
+  //console.log(Tokens.length)
   var requests = RequestsArray.filter(request => {
     var i;
     for(i = 0;i < Tokens.length;i++){
+      //console.log(Tokens[i].tokenOwner)
+      //console.log(request.tokenOwner)
       if(Tokens[i].tokenOwner === request.tokenOwner && Tokens[i].tokenType === request.tokenType)
         return true;
     }
@@ -107,6 +121,17 @@ const getFilteredOffersBook = async(OffersArray, RequestId) => {
   return offersArray;
 }
 
+// As the orders come in as JSON they need to be turned into the correct types such as BigNumber
+function parseHTTPOrder(signedOrder) {
+    signedOrder.salt = new web3.BigNumber(signedOrder.salt);
+    signedOrder.makerAssetAmount = new web3.BigNumber(signedOrder.makerAssetAmount);
+    signedOrder.takerAssetAmount = new web3.BigNumber(signedOrder.takerAssetAmount);
+    signedOrder.makerFee = new web3.BigNumber(signedOrder.makerFee);
+    signedOrder.takerFee = new web3.BigNumber(signedOrder.takerFee);
+    signedOrder.expirationTimeSeconds = new web3.BigNumber(signedOrder.expirationTimeSeconds);
+    return signedOrder;
+}
+
 module.exports = {
   addRequest,
   getRequest,
@@ -114,7 +139,8 @@ module.exports = {
   getFilteredRequestBook,
   addOffer,
   getFilteredOffersBook,
-  getFilteredRequestBookByName
+  getFilteredRequestBookByName,
+  parseHTTPOrder
 }
 //export addRequest;
 //export getOrder;
