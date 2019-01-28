@@ -2,7 +2,7 @@ import Card from "../contracts/Card.json";
 
 const getAccountInfo = async(web3, networkId, accounts) => {
 
-  console.log('getAccount: ' + accounts[0])
+  //console.log('getAccount: ' + accounts[0])
 
   const deployedNetwork = Card.networks[networkId];
 
@@ -11,9 +11,9 @@ const getAccountInfo = async(web3, networkId, accounts) => {
     deployedNetwork && deployedNetwork.address,
   );
 
-  const name = await instance.methods.name().call()
+  // const name = await instance.methods.name().call()
 
-  console.log(name);
+  //console.log(name);
 
   var tokensOwned = await instance.methods.tokensOwned(accounts[0]).call();             // Returns arrays of indexes: [], balances: []
 
@@ -21,29 +21,37 @@ const getAccountInfo = async(web3, networkId, accounts) => {
   var balances = tokensOwned[1];
 
   var tokens = [];
+  var tokenCounts = {};
 
   if(indexes.length < 1){
     console.log('No Tokens For Account');
   }else{
-    var balance = 0;
     for(var i = 0;i < indexes.length;i++){
-      console.log('Get Token Metadata');
       var tokenId = indexes[i];
-      var balance = balances[i];
-      console.log('Token ID: ' + tokenId)
-      console.log('Token Balance: ' + balance);
+      //console.log('Get Token Metadata');
+      var tokenMeta = await instance.methods.getTokenMeta(tokenId).call();
+      console.log('ID: ' + tokenId + ', Balance:' + balances[i] + ' ' + tokenMeta.owner + ' ' + tokenMeta.tokenType + ' ' + tokenMeta.tokenName)
 
       tokens.push({
-        name: 'testName',
+        name: tokenMeta.tokenName,
         id: tokenId,
-        balance: balance
+        balance: balances[i],
+        tokenOwner: tokenMeta.owner,
+        tokenType: tokenMeta.tokenType,
+        image: tokenMeta.image
       })
+
+      if(tokenCounts[tokenMeta.tokenType] == undefined){
+        tokenCounts[tokenMeta.tokenType] = 1;
+      }else{
+        tokenCounts[tokenMeta.tokenType]++;
+      }
     }
   }
 
-  console.log(tokens)
+  //console.log(tokens)
 
-  return tokens;
+  return [tokens, tokenCounts];
 }
 
 const getTokens = async(ContractInstance, Address) => {
@@ -65,7 +73,4 @@ const getTokens = async(ContractInstance, Address) => {
 
 }
 
-module.exports = {
-  getAccountInfo,
-  getTokens
-}
+export {getAccountInfo, getTokens}

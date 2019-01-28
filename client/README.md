@@ -56,3 +56,6 @@ Extended to accept requests for trade.
 ## tests
 Full range of tests for MultiAsset transfer.
 https://github.com/0xProject/0x-starter-project/blob/master/src/scenarios/fill_order_multi_asset.ts#L19
+
+
+An ERC721 Treasure Hunt Dapp that allows users to source, negotiate and trade bundles of NFTs via 0x.

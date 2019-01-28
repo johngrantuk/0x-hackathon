@@ -15,6 +15,12 @@ var orders = [];
 var offers = [];
 var ordersByHash = {};
 var requests = [];
+var challenges = [
+  { type: 'type', name: 'Free Coffee', owner: 'MilkMan', prize: 'Free Coffee', requiredTokens: [{ id: 1, tokenOwner: 'MilkMan', tokenType: 'Coffee', image: 'https://www.brian-coffee-spot.com/wp-content/uploads/2015/10/Thumbnail-The-Milkman-DSC_1913t-150x200.jpg', qty: 5 }] },
+  { type: 'type', name: 'Tea Genie', owner: 'MilkMan', prize: 'Tea Genie', requiredTokens: [{ id: 2, tokenOwner: 'MilkMan', tokenType: 'Tea', image: 'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fb%2Fb8%2FMug_of_Tea.JPG&f=1', qty: 1 }, { id: 3, tokenOwner: 'MilkMan', tokenType: 'Milk', image: 'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fwww.telegraph.co.uk%2Fcontent%2Fdam%2Fexpat%2F2016%2F03%2F03%2F89992402_D6EEPE_Milk_Bottle-xlarge.jpg&f=1', qty: 1 }, { id: 4, tokenOwner: 'MilkMan', tokenType: 'Biscuit', image: 'https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIP.7zi3pUhUNEqLMT3p3xygxQHaE8%26pid%3D15.1&f=1',  qty: 1 }] },
+  { type: 'type', name: 'Big Fizz', owner: 'Barrs', prize: 'Bawbag', requiredTokens: [{ id: 5, tokenOwner: 'IrnBru', tokenType: 'IrnBruSpecial', image: 'https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fs-media-cache-ak0.pinimg.com%2F736x%2F77%2F4e%2F3a%2F774e3a9e032eba60ff1cce1f8db1fa16.jpg&f=1', qty: 1 }, { id: 6, tokenOwner: 'IrnBru', tokenType: 'Girders', image: 'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fwww.agbarr.co.uk%2Fmedia%2F288335%2FIRN-BRU-Regular-750ml-16.jpg&f=1', qty: 1 }] }
+];
+
 // We subscribe to the Exchange Events to remove any filled or cancelled orders
 var contractWrappers = new _0x_js_1.ContractWrappers(provider_engine_1.providerEngine, { networkId: configs_1.NETWORK_CONFIGS.networkId });
 contractWrappers.exchange.subscribe(_0x_js_1.ExchangeEvents.Fill, {}, function (err, decodedLogEvent) {
@@ -185,6 +191,7 @@ app.post('/request', async function (req, res) {
  * Extension added by JG for 0x Hackathon
  */
 app.get('/filteredrequestsbynames', async function (req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
 
     var networkIdRaw = req.query.networkId;
     var tokens = req.query.tokens;
@@ -259,6 +266,26 @@ app.get('/offers', async function (req, res) {
     else {
         var filteredOffers = await requestHelper.getFilteredOffersBook(offers, requestId);
         res.status(HTTP_OK_STATUS).send(filteredOffers);
+    }
+});
+/**
+ * GET challenges
+ * Extension added by JG for 0x Hackathon
+ */
+app.get('/challenges', async function (req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    var networkIdRaw = req.query.networkId;
+    var networkId = parseInt(networkIdRaw, 10);
+
+    console.log('HTTP: GET challenges');
+
+    if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
+        console.log("Incorrect Network ID: " + networkId);
+        res.status(HTTP_BAD_REQUEST_STATUS).send({});
+    }
+    else {
+        res.status(HTTP_OK_STATUS).send(challenges);
     }
 });
 
