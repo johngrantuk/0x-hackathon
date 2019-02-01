@@ -3,17 +3,16 @@ import {Col, Row, Button, Modal } from 'react-bootstrap';
 import ChallengeToken from './ChallengeToken';
 import NumericInput from 'react-numeric-input';
 import uuid from 'uuid';
+import { getContractAddress, getTokenMeta } from './utils/contract-helper';
+
+let axios = require('axios');
 
 export default class Challenge extends React.Component {
 
   state = {
     challengeComplete: true,
     show: false,
-    wantTokens: {},
-    tradeTokens: {},
-    qty: 0
   }
-
 
   constructor(props, context) {
       super(props, context);
@@ -50,15 +49,30 @@ export default class Challenge extends React.Component {
   handleTradeQty(e, string, input) {
     var id = input.className;
     this.tradeTokens[id] = string;
-    console.log(this.tradeTokens);
+    // console.log(this.tradeTokens);
   }
 
   handleWantQty(e, string, input) {
     var id = input.className;
     this.wantTokens[id] = string;
-    console.log(this.wantTokens);
-
+    console.log('test')
+    // console.log(this.wantTokens);
   }
+
+  test(qty, token){
+    token.requestAmount = qty;
+    console.log(token)
+    console.log(qty)
+    this.wantTokens[token.id] = token;
+  }
+  /*
+  handleWantQty(Token) {
+    console.log(Token)
+    //var id = input.className;
+    //this.wantTokens[id] = string;
+    // console.log(this.wantTokens);
+  }
+  */
 
   handleRequest(){
     var swapTokens = [];
@@ -66,29 +80,89 @@ export default class Challenge extends React.Component {
       swapTokens.push({address: this.props.userTokens[i].address, id: this.props.userTokens[i].id})
       //swapTokens.push({address: , id: })
     }
-
+    /*
     console.log('Swap Tokens: ');
     console.log(swapTokens);
 
     console.log('Want Tokens:')
     console.log(this.wantTokens)
+    */
 
+    /*
+    Only going for open Request initially
     var takeQtys = [];
     var takeAssets = [];
     for(var id in this.wantTokens){
       takeQtys.push(this.wantTokens[id]);
       takeAssets.push(id); // This will be encode721...
     }
+    */
+    this.SendRequests(swapTokens);
+  }
 
-    console.log('take MultiAsset: ')
-    console.log(takeQtys)
-    console.log(takeAssets)
+  async SendRequests(SwapTokens){
+    var contractAddress = await getContractAddress();
+    console.log('Contract Address: ' + contractAddress);
 
-    var makeQtys = [];
-    var makeAssets = [];
-    for(var id in this.tradeTokens){
-      makeQtys.push(this.tradeTokens[id]);
-      makeAssets.push(id); // This will be encode721...
+    console.log('Want Tokens: ')
+    console.log(this.wantTokens)
+
+    for(var tokenId in this.wantTokens){
+      var token = this.wantTokens[tokenId];
+
+      var request = {
+        requestTokenAddress: contractAddress,
+        requestTokenId: token.id,
+        tokenOwner: token.tokenOwner,
+        tokenType: token.tokenType,
+        requestAmount: token.requestAmount,
+        swaps: SwapTokens
+      }
+
+      console.log('Posting Request: ')
+      console.log(request)
+
+      var response = await axios.post('http://localhost:3000/request?networkId=50', request);
+
+      console.log('Response: ' + response.status);
+
+      var relayRequestId = response.data.id;
+    }
+
+    this.setState({show: false});
+  }
+  /*
+  async SendRequests(SwapTokens){
+    var contractAddress = await getContractAddress();
+    console.log('Contract Address: ' + contractAddress);
+
+    console.log('Want Tokens: ')
+    console.log(this.wantTokens)
+
+    for(var id in this.wantTokens){
+
+      var meta = await getTokenMeta(this.props.web3, id);
+
+      console.log('Meta: ')
+      console.log(meta)
+
+      var request = {
+        requestTokenAddress: contractAddress,
+        requestTokenId: id,
+        tokenOwner: meta.tokenOwner,
+        tokenType: meta.tokenType,
+        requestAmount: this.wantTokens[id],
+        swaps: SwapTokens
+      }
+
+      console.log('Posting Request: ')
+      console.log(request)
+
+      var response = await axios.post('http://localhost:3000/request?networkId=50', request);
+
+      console.log('Response: ' + response.status);
+
+      var relayRequestId = response.data.id;
     }
     // assetDataUtils.encodeERC721AssetData(cardInstance.address, specialIrnBruTokenId)
     /*
@@ -97,23 +171,7 @@ export default class Challenge extends React.Component {
         [client4irnBruTakerAssetData, client4WaterTakerAssetData],
     );
     */
-  }
-  /*
-  // Post request
-  var request = {
-    requestTokenAddress: cardInstance.address,
-    requestTokenId: client4milkId,
-    tokenOwner: 'MilkMan',
-    tokenType: 'Milk',
-    requestAmount: milkRequestAmount, // THIS WILL BE 1 FOR MultiAsset
-    swaps: [{address: cardInstance.address, id: specialIrnBruTokenId}, {address: cardInstance.address, id: waterTokenId}, {address: cardInstance.address, id: coffeeTokenId}]
-  }
-
-  var response = await axios.post('http://localhost:3000/request?networkId=50', request);
-  assert.equal(response.status, 200);
-
-  var relayRequestId = response.data.id;
-  */
+  //}
 
   render() {
 
@@ -159,11 +217,12 @@ export default class Challenge extends React.Component {
                 <Col sm={1} md={1} lg={1}>
                   Qty
 
-                  <NumericInput className={token.id.toString()} min={0} max={20} value={0} onChange={this.handleWantQty}/>
+                  <NumericInput className={token.id.toString()} min={0} max={20} value={0} onChange={(e) => this.test(e, token)}/>
 
                 </Col>
               </Row>
             )}
+            {/*
             Trade:
             {userTokens.map(token =>
               <Row key={uuid.v4()}>
@@ -178,6 +237,9 @@ export default class Challenge extends React.Component {
                 </Col>
               </Row>
             )}
+            */}
+
+            <h2>Your Request Will Be Sent And Offers Returned</h2>
 
             <Button bsStyle="primary"  onClick={this.handleRequest}>REQUEST</Button>
           </Modal.Body>

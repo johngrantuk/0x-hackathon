@@ -74,4 +74,26 @@ const getTokens = async(ContractInstance, Address) => {
 
 }
 
-export {getAccountInfo, getTokens}
+const getContractAddress = async() => {
+    const deployedNetwork = Card.networks[50];
+    return deployedNetwork.address;
+}
+
+const getTokenMeta = async(web3, TokenId) => {
+  const deployedNetwork = Card.networks[50];
+
+  console.log('Web3: ')
+  console.log(web3)
+
+  const instance = new web3.eth.Contract(
+    Card.abi,
+    deployedNetwork && deployedNetwork.address,
+  );
+
+  console.log('Getting meta for: ' + TokenId);
+  var tokenMeta = await instance.methods.getTokenMeta(TokenId).call();
+  console.log(tokenMeta)
+  return tokenMeta;
+}
+
+export {getAccountInfo, getTokens, getContractAddress, getTokenMeta}

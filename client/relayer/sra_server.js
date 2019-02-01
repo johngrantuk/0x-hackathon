@@ -6,6 +6,7 @@ var express = require("express");
 var configs_1 = require("./configs");
 var constants_1 = require("./constants");
 var provider_engine_1 = require("./provider_engine");
+var cors = require('cors');
 var HTTP_OK_STATUS = 200;
 var HTTP_BAD_REQUEST_STATUS = 400;
 var HTTP_PORT = 3000;
@@ -49,6 +50,8 @@ contractWrappers.exchange.subscribe(_0x_js_1.ExchangeEvents.Cancel, {}, function
 });
 // HTTP Server
 var app = express();
+
+app.use(cors());
 app.use(bodyParser.json());
 /**
  * GET Orderbook endpoint retrieves the orderbook for a given asset pair.
@@ -121,7 +124,10 @@ app.post('/v2/order', function (req, res) {
  * Extension added by JG for 0x Hackathon
  */
 app.get('/requestsbytype', async function (req, res) {
-
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
     var networkIdRaw = req.query.networkId;
     var tokenOwner = req.query.tokenOwner;
     var tokenType = req.query.tokenType;
@@ -146,7 +152,10 @@ app.get('/requestsbytype', async function (req, res) {
  * Extension added by JG for 0x Hackathon
  */
 app.get('/requestbyid', async function (req, res) {
-
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
     var networkIdRaw = req.query.networkId;
     var requestIdRaw = req.query.requestId;
 
@@ -169,7 +178,8 @@ app.get('/requestbyid', async function (req, res) {
  * Extension added by JG for 0x Hackathon
  */
 app.post('/request', async function (req, res) {
-    console.log('HTTP: POST request');
+
+    console.log('HTTP: POST request!');
     var networkIdRaw = req.query.networkId;
 
     var networkId = parseInt(networkIdRaw, 10);
@@ -184,7 +194,8 @@ app.post('/request', async function (req, res) {
       // var orderHash = _0x_js_1.orderHashUtils.getOrderHashHex(signedOrder);
       // ordersByHash[orderHash] = signedOrder;
       // orders.push(signedOrder);
-      res.status(HTTP_OK_STATUS).send({id: id});
+      res.status(200).send({id: id});
+      //res.status(HTTP_OK_STATUS).send({id: id});
     }
 });
 /**
@@ -292,7 +303,7 @@ app.get('/challenges', async function (req, res) {
 
 
 
-app.listen(HTTP_PORT, function () { return console.log('Standard relayer API (HTTP) listening on port 3000!'); });
+app.listen(HTTP_PORT, function () { return console.log('Standard relayer API (HTTP) listening on port 3000! JOHNS'); });
 function getCurrentUnixTimestampSec() {
     var milisecondsInSecond = 1000;
     return new _0x_js_1.BigNumber(Date.now() / milisecondsInSecond).round();
