@@ -38,7 +38,8 @@ const getAccountInfo = async(web3, networkId, accounts) => {
         balance: balances[i],
         tokenOwner: tokenMeta.owner,
         tokenType: tokenMeta.tokenType,
-        image: tokenMeta.image
+        image: tokenMeta.image,
+        address: deployedNetwork.address
       })
 
       if(tokenCounts[tokenMeta.tokenType] == undefined){

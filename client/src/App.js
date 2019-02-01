@@ -17,7 +17,7 @@ class App extends Component {
     storageValue: 0,
     web3: null,
     accounts: null,
-    tokens: []
+    userTokens: []
   };
 
   componentDidMount = async () => {
@@ -37,10 +37,10 @@ class App extends Component {
       const networkId = await web3.eth.net.getId();
 
       var tokenInfo = await getAccountInfo(web3, networkId, accounts);
-      var tokens = tokenInfo[0];
+      var userTokens = tokenInfo[0];
       var tokenCounts = tokenInfo[1];
-      console.log('tokens:')
-      console.log(tokens)
+      console.log('userTokens:')
+      console.log(userTokens)
 
       var challenges = await axios.get('http://localhost:3000/challenges', { params: { networkId: networkId}});
 
@@ -52,7 +52,7 @@ class App extends Component {
       });
 
       this.setState({
-        tokens: tokens,
+        userTokens: userTokens,
         challenges: challenges.data,
         tokenCounts: tokenCounts
       });
@@ -68,7 +68,7 @@ class App extends Component {
   };
 
   render() {
-    const tokens = this.state.tokens;
+    const userTokens = this.state.userTokens;
     const accounts = this.state.accounts;
     const challenges = this.state.challenges;
     const tokenCounts = this.state.tokenCounts;
@@ -86,7 +86,7 @@ class App extends Component {
             </Panel.Heading>
             <Panel.Body>
               <div>
-                {tokens.map(token =>
+                {userTokens.map(token =>
                   <Token key={ token.id } token={ token } />
                 )}
               </div>
@@ -100,7 +100,7 @@ class App extends Component {
             <Panel.Body>
               <div>
                 {challenges.map(challenge =>
-                  <Challenge key={challenge.name} challenge={ challenge} tokenCounts={tokenCounts} />
+                  <Challenge key={challenge.name} challenge={challenge} tokenCounts={tokenCounts} userTokens={userTokens}/>
                 )}
               </div>
             </Panel.Body>
