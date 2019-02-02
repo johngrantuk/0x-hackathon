@@ -62,6 +62,30 @@ const load = async() => {
 
 }
 
+const loadAccount1 = async() => {
+  const provider = new Web3.providers.HttpProvider(
+    "http://127.0.0.1:8545"
+  );
+
+  const web3 = new Web3(provider);
+  const accounts = await web3.eth.getAccounts();
+
+  console.log('Loading Account1: ' + accounts[1]);
+
+  const deployedNetwork = Card.networks[50];
+
+  const instance = new web3.eth.Contract(
+    Card.abi,
+    deployedNetwork && deployedNetwork.address,
+  );
+
+  console.log('Minting...')
+  await instance.methods.mint(101, accounts[1], 'MilkMan', 'Coffee', 'Coffee101', 'https://www.brian-coffee-spot.com/wp-content/uploads/2015/10/Thumbnail-The-Milkman-DSC_1913t-150x200.jpg').send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });;
+  await instance.methods.mint(102, accounts[1], 'MilkMan', 'Milk', 'Milk102', 'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fwww.telegraph.co.uk%2Fcontent%2Fdam%2Fexpat%2F2016%2F03%2F03%2F89992402_D6EEPE_Milk_Bottle-xlarge.jpg&f=1').send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });;
+  await instance.methods.mint(103, accounts[1], 'MilkMan', 'Tea', 'Tea103', 'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fb%2Fb8%2FMug_of_Tea.JPG&f=1').send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });;
+}
+
+
 const getTokens = async(ContractInstance, Address) => {
   var tokens = {};
 
@@ -81,4 +105,4 @@ const getTokens = async(ContractInstance, Address) => {
 
 }
 
-load();
+loadAccount1();

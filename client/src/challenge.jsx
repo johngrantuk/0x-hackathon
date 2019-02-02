@@ -65,14 +65,6 @@ export default class Challenge extends React.Component {
     console.log(qty)
     this.wantTokens[token.id] = token;
   }
-  /*
-  handleWantQty(Token) {
-    console.log(Token)
-    //var id = input.className;
-    //this.wantTokens[id] = string;
-    // console.log(this.wantTokens);
-  }
-  */
 
   handleRequest(){
     var swapTokens = [];
@@ -80,23 +72,7 @@ export default class Challenge extends React.Component {
       swapTokens.push({address: this.props.userTokens[i].address, id: this.props.userTokens[i].id})
       //swapTokens.push({address: , id: })
     }
-    /*
-    console.log('Swap Tokens: ');
-    console.log(swapTokens);
 
-    console.log('Want Tokens:')
-    console.log(this.wantTokens)
-    */
-
-    /*
-    Only going for open Request initially
-    var takeQtys = [];
-    var takeAssets = [];
-    for(var id in this.wantTokens){
-      takeQtys.push(this.wantTokens[id]);
-      takeAssets.push(id); // This will be encode721...
-    }
-    */
     this.SendRequests(swapTokens);
   }
 
@@ -131,47 +107,6 @@ export default class Challenge extends React.Component {
 
     this.setState({show: false});
   }
-  /*
-  async SendRequests(SwapTokens){
-    var contractAddress = await getContractAddress();
-    console.log('Contract Address: ' + contractAddress);
-
-    console.log('Want Tokens: ')
-    console.log(this.wantTokens)
-
-    for(var id in this.wantTokens){
-
-      var meta = await getTokenMeta(this.props.web3, id);
-
-      console.log('Meta: ')
-      console.log(meta)
-
-      var request = {
-        requestTokenAddress: contractAddress,
-        requestTokenId: id,
-        tokenOwner: meta.tokenOwner,
-        tokenType: meta.tokenType,
-        requestAmount: this.wantTokens[id],
-        swaps: SwapTokens
-      }
-
-      console.log('Posting Request: ')
-      console.log(request)
-
-      var response = await axios.post('http://localhost:3000/request?networkId=50', request);
-
-      console.log('Response: ' + response.status);
-
-      var relayRequestId = response.data.id;
-    }
-    // assetDataUtils.encodeERC721AssetData(cardInstance.address, specialIrnBruTokenId)
-    /*
-    const takerAssetData = assetDataUtils.encodeMultiAssetData(
-        [new BigNumber(1), new BigNumber(1)],
-        [client4irnBruTakerAssetData, client4WaterTakerAssetData],
-    );
-    */
-  //}
 
   render() {
 

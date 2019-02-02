@@ -3,6 +3,7 @@ import getWeb3 from "./utils/getWeb3";
 import { Panel } from 'react-bootstrap';
 import Token from './token';
 import Challenge from './challenge';
+import Offer from './Offer';
 
 // import { Web3Wrapper } from '@0x/web3-wrapper';
 import "./App.css";
@@ -39,25 +40,39 @@ class App extends Component {
       var tokenInfo = await getAccountInfo(web3, networkId, accounts);
       var userTokens = tokenInfo[0];
       var tokenCounts = tokenInfo[1];
-      console.log('userTokens:')
-      console.log(userTokens)
+      //console.log('userTokens:');
+      //console.log(userTokens);
+
+      var tokenFilter = [];
+      for(var i = 0;i < userTokens.length;i++){
+        // console.log(userTokens[i]);
+        tokenFilter.push({tokenOwner: userTokens[i].tokenOwner, tokenType: userTokens[i].tokenType})
+      }
+
+      console.log('tokenFilters: ')
+      console.log(tokenFilter)
 
       var challenges = await axios.get('http://localhost:3000/challenges', { params: { networkId: networkId}});
 
-      var response = await axios.get('http://localhost:3000/filteredrequestsbynames', {
+      var filteredRequests = await axios.get('http://localhost:3000/filteredrequestsbynames', {
         params: {
           networkId: 50,
-          tokens: [{tokenOwner: 'CocaCola', tokenType: 'Coke'}]
+          tokens: tokenFilter
         }
       });
+
+      console.log('filteredRequests: ')
+      console.log(filteredRequests.data)
 
       this.setState({
         userTokens: userTokens,
         challenges: challenges.data,
-        tokenCounts: tokenCounts
+        tokenCounts: tokenCounts,
+        web3,
+        accounts,
+        filteredRequests: filteredRequests.data
       });
 
-      this.setState({ web3, accounts });
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -72,6 +87,7 @@ class App extends Component {
     const accounts = this.state.accounts;
     const challenges = this.state.challenges;
     const tokenCounts = this.state.tokenCounts;
+    const filteredRequests = this.state.filteredRequests;
 
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -108,10 +124,23 @@ class App extends Component {
 
           <Panel>
             <Panel.Heading>
-              <Panel.Title componentClass="h3">TRADE</Panel.Title>
+              <Panel.Title componentClass="h3">OPEN REQUESTS</Panel.Title>
             </Panel.Heading>
             <Panel.Body>
-              Panel content
+              {filteredRequests.map(request =>
+                <Offer key={request.id} request={request} userTokens={userTokens} web3={this.state.web3} account={accounts[0]}/>
+              )}
+            </Panel.Body>
+          </Panel>
+
+          <Panel>
+            <Panel.Heading>
+              <Panel.Title componentClass="h3">OPEN OFFERS</Panel.Title>
+            </Panel.Heading>
+            <Panel.Body>
+              {filteredRequests.map(request =>
+                <Offer key={request.id} request={request} userTokens={userTokens} web3={this.state.web3}/>
+              )}
             </Panel.Body>
           </Panel>
         </div>
