@@ -240,6 +240,16 @@ class App extends Component {
                   <Col sm={1} md={1} lg={1}>
                     <h1>GET: </h1>
                   </Col>
+                  {offer.MakerTokens.map(offerToken =>
+                    <Col key={uuid.v4()} sm={2} md={2} lg={2}>
+                      <img role="presentation" style={{"width" : "100%"}} src={offerToken.image}/>
+                      <strong>{offerToken.tokenOwner}</strong>
+                      <br/>
+                      <span>{offerToken.tokenType}</span><br/>
+                      <span>{offerToken.id}</span>
+                    </Col>
+                  )}
+                  {/*
                   <Col sm={2} md={2} lg={2}>
                     <img role="presentation" style={{"width" : "100%"}} src={offer.Request.image}/>
                     <strong>{offer.Request.tokenOwner}</strong>
@@ -247,11 +257,12 @@ class App extends Component {
                     <span>{offer.Request.tokenType}</span><br/>
                     <span>{offer.Request.requestTokenId}</span>
                   </Col>
+                  */}
                   <Col sm={1} md={1} lg={1}>
                     <h1>FOR: </h1>
                   </Col>
 
-                  {offer.Offer.map(offerToken =>
+                  {offer.TakerTokens.map(offerToken =>
                     <Col key={uuid.v4()} sm={2} md={2} lg={2}>
                       <img role="presentation" style={{"width" : "100%"}} src={offerToken.image}/>
                       <strong>{offerToken.tokenOwner}</strong>

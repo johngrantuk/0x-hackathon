@@ -31,6 +31,7 @@ export default class Offer extends React.Component {
       this.makeOffer = this.makeOffer.bind(this);
 
       this.offerTokens = {};
+      this.makeTokens = {};
   }
 
   createOffer() {
@@ -39,6 +40,14 @@ export default class Offer extends React.Component {
 
   handleClose() {
     this.setState({ show: false });
+  }
+
+  updateMakeTokens(qty, token){
+    token.offerAmount = qty;
+    console.log('Make Token: ')
+    console.log(token)
+    console.log(qty)
+    this.makeTokens[token.id] = token;
   }
 
   test(qty, token){
@@ -83,23 +92,40 @@ export default class Offer extends React.Component {
     var contractAddress = await getContractAddress();
     const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
     const ZERO = new BigNumber(0);
-    var takeQtys = [];
-    var assetDatas = [];
+    var takerQtys = [];
+    var takerAssets = [];
+    var offers = [];
+    /*
+    for(var tokenId in this.offerTokens){
+      var token = this.offerTokens[tokenId];
+      offers.push(token);
+    }
+    */
 
-    console.log('Taker IDS: ')
     for(var tokenId in this.offerTokens){
       var token = this.offerTokens[tokenId];
       var assetData = assetDataUtils.encodeERC721AssetData(contractAddress, token.id);
-      console.log(token.id)
-      takeQtys.push(new BigNumber(token.offerAmount));
-      assetDatas.push(assetData);
+      takerQtys.push(new BigNumber(token.offerAmount));
+      takerAssets.push(assetData);
+      offers.push(token);
     }
 
-    console.log('Maker Token ID: ' + request.requestTokenId);
+    const takerAssetData = assetDataUtils.encodeMultiAssetData(takerQtys, takerAssets);
 
+    var makerQtys = [];
+    var makerAssets = [];
+    var makerTokens = [];
 
-    const makerAssetData = assetDataUtils.encodeERC721AssetData(contractAddress, request.requestTokenId);
-    const takerAssetData = assetDataUtils.encodeMultiAssetData(takeQtys, assetDatas);
+    for(var tokenId in this.makeTokens){
+      var token = this.makeTokens[tokenId];
+      var assetData = assetDataUtils.encodeERC721AssetData(contractAddress, token.id);
+      makerQtys.push(new BigNumber(token.offerAmount));
+      makerAssets.push(assetData);
+      makerTokens.push(token);
+    }
+
+    //const makerAssetData = assetDataUtils.encodeERC721AssetData(contractAddress, 102);
+    const makerAssetData = assetDataUtils.encodeMultiAssetData(makerQtys, makerAssets);
 
     const randomExpiration = new BigNumber(Date.now() + 1000*60*10).div(1000).ceil();
 
@@ -118,7 +144,7 @@ export default class Offer extends React.Component {
         feeRecipientAddress: NULL_ADDRESS,
         expirationTimeSeconds: randomExpiration,
         salt: generatePseudoRandomSalt(),
-        makerAssetAmount: new BigNumber(request.requestAmount),
+        makerAssetAmount: new BigNumber(1),
         takerAssetAmount: new BigNumber(1),
         makerAssetData: makerAssetData,
         takerAssetData: takerAssetData,
@@ -136,19 +162,14 @@ export default class Offer extends React.Component {
     const signedOrder = { ...order, signature: signature };
     //console.log(signedOrder);
 
-    var offers = [];
-    for(var tokenId in this.offerTokens){
-      var token = this.offerTokens[tokenId];
-      offers.push(token);
-    }
-
     var offer = {
       networkId: 50,
       requestId: request.id,
       order: order,
       signedOrder: signedOrder,
       request: request,
-      offer: offers
+      offers: offers,
+      makerTokens: makerTokens
     }
 
     var response = await axios.post('http://localhost:3000/offer', offer);
@@ -167,18 +188,11 @@ export default class Offer extends React.Component {
     return(
       <div>
         <Row className="show-grid">
-          <Col sm={1} md={1} lg={1}>
-            { request.tokenOwner }
-          </Col>
-          <Col sm={1} md={1} lg={1}>
-            { request.tokenType }
-          </Col>
-          <Col sm={1} md={1} lg={1}>
-            { request.requestAmount }
-          </Col>
-          <Col sm={1} md={1} lg={1}>
+
+            <h2>Someone Wants { request.requestAmount }: { request.tokenOwner } { request.tokenType }</h2>
+
             <Button bsStyle="primary"  onClick={this.createOffer}>MAKE AN OFFER</Button>
-          </Col>
+
         </Row>
 
         <Modal show={this.state.show} onHide={this.handleClose}>
@@ -186,6 +200,22 @@ export default class Offer extends React.Component {
             <Modal.Title>Make Your Offer</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            <h3>What You'll Give</h3>
+            {userTokens.map(token =>
+              <Row key={uuid.v4()}>
+                <Col sm={1} md={1} lg={1}>
+                  <img role="presentation" style={{"width" : "100%"}} src={token.image}/>
+                  <strong>{token.tokenOwner} </strong> <span>{token.tokenType}</span><br/>
+                  <span>{token.id}</span>
+                </Col>
+                <Col sm={1} md={1} lg={1}>
+                  Qty
+                  <NumericInput className={token.id.toString()} min={0} max={1} value={0} onChange={(e) => this.updateMakeTokens(e, token)}/>
+                </Col>
+              </Row>
+            )}
+
+            <h3>What You Want</h3>
             {request.requestSwaps.map(token =>
               <Row key={uuid.v4()}>
                 <Col sm={1} md={1} lg={1}>

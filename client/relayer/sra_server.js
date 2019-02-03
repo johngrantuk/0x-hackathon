@@ -244,7 +244,8 @@ app.post('/offer', async function (req, res) {
     var networkId = parseInt(networkIdRaw, 10);
     var requestId = parseInt(requestIdRaw, 10);
     var request = req.body.request;
-    var offer = req.body.offer;
+    var takerTokens = req.body.offers;
+    var makerTokens = req.body.makerTokens;
 
     console.log('HTTP: POST offer: ' + requestId);
     if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
@@ -254,7 +255,7 @@ app.post('/offer', async function (req, res) {
     else {
       // console.log(req.body);
       // var signedOrder = parseHTTPOrder(req.body);
-      await requestHelper.addOffer(offers, order, signedOrder, requestId, request, offer);
+      await requestHelper.addOffer(offers, order, signedOrder, requestId, request, takerTokens, makerTokens);
 
       res.status(HTTP_OK_STATUS).send({});
     }
