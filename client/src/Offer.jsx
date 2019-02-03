@@ -85,12 +85,18 @@ export default class Offer extends React.Component {
     const ZERO = new BigNumber(0);
     var takeQtys = [];
     var assetDatas = [];
+
+    console.log('Taker IDS: ')
     for(var tokenId in this.offerTokens){
       var token = this.offerTokens[tokenId];
       var assetData = assetDataUtils.encodeERC721AssetData(contractAddress, token.id);
+      console.log(token.id)
       takeQtys.push(new BigNumber(token.offerAmount));
       assetDatas.push(assetData);
     }
+
+    console.log('Maker Token ID: ' + request.requestTokenId);
+
 
     const makerAssetData = assetDataUtils.encodeERC721AssetData(contractAddress, request.requestTokenId);
     const takerAssetData = assetDataUtils.encodeMultiAssetData(takeQtys, assetDatas);

@@ -11,17 +11,17 @@ import {ContractWrappers, RPCSubprovider, Web3ProviderEngine, BigNumber } from '
 // import { Web3Wrapper } from '@0x/web3-wrapper';
 import "./App.css";
 
-import { getAccountInfo } from './utils/contract-helper';
+import { getAccountInfo, getContractAddress } from './utils/contract-helper';
 
 let axios = require('axios');
 
 
 class App extends Component {
   state = {
-    storageValue: 0,
     web3: null,
     accounts: null,
-    userTokens: []
+    userTokens: [],
+    isProxyApproved: false
   };
 
   constructor(props, context) {
@@ -31,16 +31,11 @@ class App extends Component {
 
   componentDidMount = async () => {
     try {
-      // <div key={item.id}>ID: {item.id} Balance: {item.balance} Meta: {item.name}</div>
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
 
       // Use web3 to get the user's accounts.
       const accounts = await web3.eth.getAccounts();
-
-      // Load user tokens
-      // Load available challenges
-      // Check for offers/requests
 
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
@@ -75,7 +70,19 @@ class App extends Component {
       var offers = await axios.get('http://localhost:3000/alloffers', { params: { networkId: networkId}});
 
       console.log('Offers: ');
-      console.log(offers.data)
+      console.log(offers.data);
+
+      const pe = new Web3ProviderEngine();
+      pe.addProvider(new RPCSubprovider('http://127.0.0.1:8545'));
+      pe.start();
+
+      const contractWrappers = new ContractWrappers(pe, { networkId: 50 });
+
+      var contractAddress = await getContractAddress();
+
+      var isApproved = await contractWrappers.erc721Token.isProxyApprovedForAllAsync(contractAddress, accounts[0]);
+
+      console.log('IsApproved: ' + isApproved);
 
       this.setState({
         userTokens: userTokens,
@@ -84,7 +91,10 @@ class App extends Component {
         web3,
         accounts,
         filteredRequests: filteredRequests.data,
-        offers: offers.data
+        offers: offers.data,
+        isProxyApproved: isApproved,
+        contractWrappers: contractWrappers,
+        contractAddress
       });
 
     } catch (error) {
@@ -95,6 +105,19 @@ class App extends Component {
       console.error(error);
     }
   };
+
+  activateTrading(){
+    console.log('Enabling Trading...');
+    this.SetProxy();
+  }
+
+  async SetProxy(){
+    const requesterERC721ApprovalTxHash = await this.state.contractWrappers.erc721Token.setProxyApprovalForAllAsync(
+        this.state.contractAddress,
+        this.state.accounts[0],
+        true,
+    );
+  }
 
   acceptOffer(e, Offer){
     console.log('Accepting Offer: ');
@@ -127,6 +150,8 @@ class App extends Component {
       takerFee: new BigNumber(Offer.signedOrder.takerFee),
       signature: Offer.signedOrder.signature
     }
+
+    console.log(acceptedSignedOrder)
     // Fill the Order via 0x.js Exchange contract
     var txHash = await contractWrappers.exchange.fillOrderAsync(acceptedSignedOrder, acceptedSignedOrder.takerAssetAmount, this.state.accounts[0], {
         gasLimit: 400000,
@@ -143,6 +168,21 @@ class App extends Component {
     const tokenCounts = this.state.tokenCounts;
     const filteredRequests = this.state.filteredRequests;
     const offers = this.state.offers;
+    const isProxyApproved = this.state.isProxyApproved;
+
+    var trade = (<Panel>
+                  <Panel.Heading>
+                    <Panel.Title componentClass="h3">ENABLE TRADING</Panel.Title>
+                  </Panel.Heading>
+                  <Panel.Body>
+                    <Button bsStyle="primary"  onClick={() => this.activateTrading()}>ACTIVATE TRADING</Button>
+                  </Panel.Body>
+                </Panel>
+              )
+
+    if(isProxyApproved){
+      trade = "";
+    }
 
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -176,6 +216,8 @@ class App extends Component {
               </div>
             </Panel.Body>
           </Panel>
+
+          { trade }
 
           <Panel>
             <Panel.Heading>
