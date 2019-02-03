@@ -69,7 +69,11 @@ export default class Challenge extends React.Component {
   handleRequest(){
     var swapTokens = [];
     for(var i = 0;i < this.props.userTokens.length;i++){
-      swapTokens.push({address: this.props.userTokens[i].address, id: this.props.userTokens[i].id})
+      swapTokens.push(
+        this.props.userTokens[i]
+        //address: this.props.userTokens[i].address,
+        //id: this.props.userTokens[i].id
+      )
       //swapTokens.push({address: , id: })
     }
 

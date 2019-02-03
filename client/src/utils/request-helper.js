@@ -103,12 +103,14 @@ const getFilteredRequestBook = async(RequestsArray, Tokens) => {
   return request;
 }
 
-const addOffer = async(OffersArray, Order, SignedOrder, RequestId) => {
+const addOffer = async(OffersArray, Order, SignedOrder, RequestId, Request, Offer) => {
 
   OffersArray.push({
     requestId: RequestId,
     order: Order,
-    signedOrder: SignedOrder
+    signedOrder: SignedOrder,
+    Request,
+    Offer
   });
 }
 

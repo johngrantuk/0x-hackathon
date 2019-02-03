@@ -4,6 +4,8 @@ import { Panel } from 'react-bootstrap';
 import Token from './token';
 import Challenge from './challenge';
 import Offer from './Offer';
+import uuid from 'uuid';
+import {Col, Row, Button, Modal } from 'react-bootstrap';
 
 // import { Web3Wrapper } from '@0x/web3-wrapper';
 import "./App.css";
@@ -61,8 +63,13 @@ class App extends Component {
         }
       });
 
-      console.log('filteredRequests: ')
-      console.log(filteredRequests.data)
+      console.log('filteredRequests: ');
+      console.log(filteredRequests.data);
+
+      var offers = await axios.get('http://localhost:3000/alloffers', { params: { networkId: networkId}});
+
+      console.log('Offers: ');
+      console.log(offers.data)
 
       this.setState({
         userTokens: userTokens,
@@ -70,7 +77,8 @@ class App extends Component {
         tokenCounts: tokenCounts,
         web3,
         accounts,
-        filteredRequests: filteredRequests.data
+        filteredRequests: filteredRequests.data,
+        offers: offers.data
       });
 
     } catch (error) {
@@ -88,6 +96,7 @@ class App extends Component {
     const challenges = this.state.challenges;
     const tokenCounts = this.state.tokenCounts;
     const filteredRequests = this.state.filteredRequests;
+    const offers = this.state.offers;
 
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -138,8 +147,33 @@ class App extends Component {
               <Panel.Title componentClass="h3">OPEN OFFERS</Panel.Title>
             </Panel.Heading>
             <Panel.Body>
-              {filteredRequests.map(request =>
-                <Offer key={request.id} request={request} userTokens={userTokens} web3={this.state.web3}/>
+              {offers.map(offer =>
+                <Row key={uuid.v4()}>
+                  <Col sm={1} md={1} lg={1}>
+                    <h1>GET: </h1>
+                  </Col>
+                  <Col sm={2} md={2} lg={2}>
+                    <img role="presentation" style={{"width" : "100%"}} src={offer.Request.image}/>
+                    <strong>{offer.Request.tokenOwner}</strong>
+                    <br/>
+                    <span>{offer.Request.tokenType}</span><br/>
+                  </Col>
+                  <Col sm={1} md={1} lg={1}>
+                    <h1>FOR: </h1>
+                  </Col>
+
+                  {offer.Offer.map(offerToken =>
+                    <Col sm={2} md={2} lg={2}>
+                      <img role="presentation" style={{"width" : "100%"}} src={offerToken.image}/>
+                      <strong>{offerToken.tokenOwner}</strong>
+                      <br/>
+                      <span>{offerToken.tokenType}</span><br/>
+                    </Col>
+                  )}
+                  <Col sm={2} md={2} lg={2}>
+                    <Button bsStyle="primary"  onClick={this.acceptOffer}>ACCEPT OFFER</Button>
+                  </Col>
+                </Row>
               )}
             </Panel.Body>
           </Panel>

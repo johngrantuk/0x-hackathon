@@ -120,13 +120,7 @@ export default class Offer extends React.Component {
         takerFee: ZERO,
     };
 
-    const mnemonicWallet = new MnemonicWalletSubprovider({
-        mnemonic: 'yes this should not be here argue ramp clarify fence smart topic',
-        baseDerivationPath: `44'/60'/0'/0`,
-    });
-
     const pe = new Web3ProviderEngine();
-    // pe.addProvider(mnemonicWallet);
     pe.addProvider(new RPCSubprovider('http://127.0.0.1:8545'));
     pe.start();
 
@@ -136,15 +130,23 @@ export default class Offer extends React.Component {
     const signedOrder = { ...order, signature: signature };
     //console.log(signedOrder);
 
+    var offers = [];
+    for(var tokenId in this.offerTokens){
+      var token = this.offerTokens[tokenId];
+      offers.push(token);
+    }
+
     var offer = {
       networkId: 50,
       requestId: request.id,
       order: order,
-      signedOrder: signedOrder
+      signedOrder: signedOrder,
+      request: request,
+      offer: offers
     }
 
-    // response = await axios.post('http://localhost:3000/offer', offer);
-    // console.log(response.status);
+    var response = await axios.post('http://localhost:3000/offer', offer);
+    console.log(response.status);
 
     this.setState({show: false});
     // this.SendRequests(swapTokens);
@@ -177,7 +179,7 @@ export default class Offer extends React.Component {
             <Modal.Title>Make Your Offer</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {userTokens.map(token =>
+            {request.requestSwaps.map(token =>
               <Row key={uuid.v4()}>
                 <Col sm={1} md={1} lg={1}>
                   <img role="presentation" style={{"width" : "100%"}} src={token.image}/>

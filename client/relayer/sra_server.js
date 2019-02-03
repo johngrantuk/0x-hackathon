@@ -243,6 +243,8 @@ app.post('/offer', async function (req, res) {
 
     var networkId = parseInt(networkIdRaw, 10);
     var requestId = parseInt(requestIdRaw, 10);
+    var request = req.body.request;
+    var offer = req.body.offer;
 
     console.log('HTTP: POST offer: ' + requestId);
     if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
@@ -252,7 +254,7 @@ app.post('/offer', async function (req, res) {
     else {
       // console.log(req.body);
       // var signedOrder = parseHTTPOrder(req.body);
-      await requestHelper.addOffer(offers, order, signedOrder, requestId);
+      await requestHelper.addOffer(offers, order, signedOrder, requestId, request, offer);
 
       res.status(HTTP_OK_STATUS).send({});
     }
@@ -280,6 +282,27 @@ app.get('/offers', async function (req, res) {
         res.status(HTTP_OK_STATUS).send(filteredOffers);
     }
 });
+/**
+ * GET offers endpoint
+ * Extension added by JG for 0x Hackathon
+ */
+app.get('/alloffers', async function (req, res) {
+
+    var networkIdRaw = req.query.networkId;
+
+    var networkId = parseInt(networkIdRaw, 10);
+
+    console.log('HTTP: GET alloffers...');
+
+    if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
+        console.log("Incorrect Network ID: " + networkId);
+        res.status(HTTP_BAD_REQUEST_STATUS).send({});
+    }
+    else {
+        res.status(HTTP_OK_STATUS).send(offers);
+    }
+});
+
 /**
  * GET challenges
  * Extension added by JG for 0x Hackathon
