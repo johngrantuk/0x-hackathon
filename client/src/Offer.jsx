@@ -150,6 +150,7 @@ export default class Offer extends React.Component {
 
     this.setState({show: false});
     // this.SendRequests(swapTokens);
+    pe.stop();
   }
 
   render() {

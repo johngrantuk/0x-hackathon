@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import getWeb3 from "./utils/getWeb3";
 import { Panel } from 'react-bootstrap';
-import Token from './token';
+import Token from './Token';
 import Challenge from './challenge';
 import Offer from './Offer';
 import uuid from 'uuid';
 import {Col, Row, Button, Modal } from 'react-bootstrap';
+import {ContractWrappers, RPCSubprovider, Web3ProviderEngine, BigNumber } from '0x.js';
 
 // import { Web3Wrapper } from '@0x/web3-wrapper';
 import "./App.css";
@@ -22,6 +23,11 @@ class App extends Component {
     accounts: null,
     userTokens: []
   };
+
+  constructor(props, context) {
+      super(props, context);
+      this.acceptOffer = this.acceptOffer.bind(this);
+  }
 
   componentDidMount = async () => {
     try {
@@ -90,6 +96,46 @@ class App extends Component {
     }
   };
 
+  acceptOffer(e, Offer){
+    console.log('Accepting Offer: ');
+    console.log(Offer)
+    this.FillOrder(Offer);
+  }
+
+  async FillOrder(Offer){
+
+    console.log('Filling Order...')
+    const pe = new Web3ProviderEngine();
+    pe.addProvider(new RPCSubprovider('http://127.0.0.1:8545'));
+    pe.start();
+
+    const contractWrappers = new ContractWrappers(pe, { networkId: 50 });
+    console.log('Filling Order 1...');
+    var acceptedSignedOrder = {
+      exchangeAddress: Offer.signedOrder.exchangeAddress,
+      makerAddress: Offer.signedOrder.makerAddress,
+      takerAddress: Offer.signedOrder.takerAddress,
+      senderAddress: Offer.signedOrder.senderAddress,
+      feeRecipientAddress: Offer.signedOrder.feeRecipientAddress,
+      expirationTimeSeconds: new BigNumber(Offer.signedOrder.expirationTimeSeconds),
+      salt: new BigNumber(Offer.signedOrder.salt),
+      makerAssetAmount: new BigNumber(Offer.signedOrder.makerAssetAmount),
+      takerAssetAmount: new BigNumber(Offer.signedOrder.takerAssetAmount),
+      makerAssetData: Offer.signedOrder.makerAssetData,
+      takerAssetData: Offer.signedOrder.takerAssetData,
+      makerFee: new BigNumber(Offer.signedOrder.makerFee),
+      takerFee: new BigNumber(Offer.signedOrder.takerFee),
+      signature: Offer.signedOrder.signature
+    }
+    // Fill the Order via 0x.js Exchange contract
+    var txHash = await contractWrappers.exchange.fillOrderAsync(acceptedSignedOrder, acceptedSignedOrder.takerAssetAmount, this.state.accounts[0], {
+        gasLimit: 400000,
+    });
+
+    console.log('Order Filled??');
+    pe.stop();
+  }
+
   render() {
     const userTokens = this.state.userTokens;
     const accounts = this.state.accounts;
@@ -157,21 +203,23 @@ class App extends Component {
                     <strong>{offer.Request.tokenOwner}</strong>
                     <br/>
                     <span>{offer.Request.tokenType}</span><br/>
+                    <span>{offer.Request.requestTokenId}</span>
                   </Col>
                   <Col sm={1} md={1} lg={1}>
                     <h1>FOR: </h1>
                   </Col>
 
                   {offer.Offer.map(offerToken =>
-                    <Col sm={2} md={2} lg={2}>
+                    <Col key={uuid.v4()} sm={2} md={2} lg={2}>
                       <img role="presentation" style={{"width" : "100%"}} src={offerToken.image}/>
                       <strong>{offerToken.tokenOwner}</strong>
                       <br/>
                       <span>{offerToken.tokenType}</span><br/>
+                      <span>{offerToken.id}</span>
                     </Col>
                   )}
                   <Col sm={2} md={2} lg={2}>
-                    <Button bsStyle="primary"  onClick={this.acceptOffer}>ACCEPT OFFER</Button>
+                    <Button bsStyle="primary"  onClick={(e) => this.acceptOffer(e, offer)}>ACCEPT OFFER</Button>
                   </Col>
                 </Row>
               )}
