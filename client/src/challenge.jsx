@@ -120,10 +120,8 @@ export default class Challenge extends React.Component {
     var challengeComplete = this.state.challengeComplete;
     var userTokens = this.props.userTokens;
 
-    var challengeState = 'Complete';
     var button = <Button bsStyle="primary"  onClick={this.handleClaim}>CLAIM</Button>;
     if(!challengeComplete){
-      challengeState = 'No Way';
       button = <Button bsStyle="primary"  onClick={this.handleBuy}>TRADE TOKENS</Button>;
     }
 
@@ -131,7 +129,7 @@ export default class Challenge extends React.Component {
       <div>
         <Row className="show-grid">
           <Col sm={1} md={1} lg={1}>
-            { challenge.name } {challengeState}
+            <h2>{ challenge.name }</h2>
           </Col>
           {challengeTokens.map(token =>
               <ChallengeToken key={ uuid.v4() } token={ token } tokenCount={tokenCounts[token.tokenType]} challengeComplete={challengeComplete} challengeNotComplete={this.challengeNotComplete}/>

@@ -12,18 +12,20 @@ export default class ChallengeToken extends React.Component {
 
       for(var i = 0;i < token.qty;i++){               // Add a token UI for every token required for challenge
 
-        var isOwned = 'Nope';
+        var isOwned = 'Not Owned';
+        var isOwnedStyle = {backgroundColor: '#cccccc'};
 
         if(tokenCount > 0){                           // Check that we haven't reached all the tokens the owner has
           isOwned = 'Owned';
           tokenCount--;
+          isOwnedStyle = {}
         }else if(this.props.challengeComplete){
           this.props.challengeNotComplete();
         }
 
         tokens.push(
-          <Col key={ uuid.v4() } sm={1} md={1} lg={1}>
-            <Panel>
+          <Col key={ uuid.v4() } sm={2} md={2} lg={2}>
+            <Panel style={isOwnedStyle}>
               <Panel.Heading>
                 <Panel.Title componentClass="h3"><img role="presentation" style={{"width" : "100%"}} src={token.image}/></Panel.Title>
               </Panel.Heading>

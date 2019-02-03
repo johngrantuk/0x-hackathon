@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import getWeb3 from "./utils/getWeb3";
 import { Panel } from 'react-bootstrap';
 import Token from './Token';
-import Challenge from './challenge';
+import Challenge from './Challenge';
 import Offer from './Offer';
 import uuid from 'uuid';
 import {Col, Row, Button, Modal } from 'react-bootstrap';
@@ -14,7 +14,6 @@ import "./App.css";
 import { getAccountInfo, getContractAddress } from './utils/contract-helper';
 
 let axios = require('axios');
-
 
 class App extends Component {
   state = {
@@ -242,35 +241,42 @@ class App extends Component {
                   </Col>
                   {offer.MakerTokens.map(offerToken =>
                     <Col key={uuid.v4()} sm={2} md={2} lg={2}>
-                      <img role="presentation" style={{"width" : "100%"}} src={offerToken.image}/>
-                      <strong>{offerToken.tokenOwner}</strong>
-                      <br/>
-                      <span>{offerToken.tokenType}</span><br/>
-                      <span>{offerToken.id}</span>
+                      <Panel>
+                        <Panel.Heading>
+                          <Panel.Title componentClass="h3"><img role="presentation" style={{"width" : "100%"}} src={offerToken.image}/></Panel.Title>
+                        </Panel.Heading>
+                        <Panel.Body>
+                          <strong>{offerToken.tokenOwner}</strong>
+                          <br/>
+                          <span>{offerToken.tokenType}</span>
+                          <br/>
+                          <span>{offerToken.id}</span>
+                        </Panel.Body>
+                      </Panel>
                     </Col>
                   )}
-                  {/*
-                  <Col sm={2} md={2} lg={2}>
-                    <img role="presentation" style={{"width" : "100%"}} src={offer.Request.image}/>
-                    <strong>{offer.Request.tokenOwner}</strong>
-                    <br/>
-                    <span>{offer.Request.tokenType}</span><br/>
-                    <span>{offer.Request.requestTokenId}</span>
-                  </Col>
-                  */}
+
                   <Col sm={1} md={1} lg={1}>
                     <h1>FOR: </h1>
                   </Col>
 
                   {offer.TakerTokens.map(offerToken =>
                     <Col key={uuid.v4()} sm={2} md={2} lg={2}>
-                      <img role="presentation" style={{"width" : "100%"}} src={offerToken.image}/>
-                      <strong>{offerToken.tokenOwner}</strong>
-                      <br/>
-                      <span>{offerToken.tokenType}</span><br/>
-                      <span>{offerToken.id}</span>
+                      <Panel>
+                        <Panel.Heading>
+                          <Panel.Title componentClass="h3"><img role="presentation" style={{"width" : "100%"}} src={offerToken.image}/></Panel.Title>
+                        </Panel.Heading>
+                        <Panel.Body>
+                          <strong>{offerToken.tokenOwner}</strong>
+                          <br/>
+                          <span>{offerToken.tokenType}</span>
+                          <br/>
+                          <span>{offerToken.id}</span>
+                        </Panel.Body>
+                      </Panel>
                     </Col>
                   )}
+
                   <Col sm={2} md={2} lg={2}>
                     <Button bsStyle="primary"  onClick={(e) => this.acceptOffer(e, offer)}>ACCEPT OFFER</Button>
                   </Col>
