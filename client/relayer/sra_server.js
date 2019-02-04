@@ -1,5 +1,6 @@
 "use strict";
 exports.__esModule = true;
+var Web3 = require('web3');
 var _0x_js_1 = require("0x.js");
 var bodyParser = require("body-parser");
 var express = require("express");
@@ -11,16 +12,44 @@ var HTTP_OK_STATUS = 200;
 var HTTP_BAD_REQUEST_STATUS = 400;
 var HTTP_PORT = 3000;
 var requestHelper = require("../src/utils/request-helper");
+const Card = require("../src/contracts/Card.json");
+var _0x_contractAddresses = require('@0x/contract-addresses');
+const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 // Global state
 var orders = [];
 var offers = [];
 var ordersByHash = {};
 var requests = [];
 var challenges = [
-  { type: 'type', name: 'Tester', owner: 'MilkMan', prize: 'Free Coffee', requiredTokens: [{ id: 12, tokenOwner: 'MilkMan', tokenType: 'Coffee', image: 'https://www.brian-coffee-spot.com/wp-content/uploads/2015/10/Thumbnail-The-Milkman-DSC_1913t-150x200.jpg', qty: 2 }] },
-  { type: 'type', name: 'Free Coffee', owner: 'MilkMan', prize: 'Free Coffee', requiredTokens: [{ id: 1, tokenOwner: 'MilkMan', tokenType: 'Coffee', image: 'https://www.brian-coffee-spot.com/wp-content/uploads/2015/10/Thumbnail-The-Milkman-DSC_1913t-150x200.jpg', qty: 5 }] },
-  { type: 'type', name: 'Tea Genie', owner: 'MilkMan', prize: 'Tea Genie', requiredTokens: [{ id: 2, tokenOwner: 'MilkMan', tokenType: 'Tea', image: 'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fb%2Fb8%2FMug_of_Tea.JPG&f=1', qty: 1 }, { id: 3, tokenOwner: 'MilkMan', tokenType: 'Milk', image: 'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fwww.telegraph.co.uk%2Fcontent%2Fdam%2Fexpat%2F2016%2F03%2F03%2F89992402_D6EEPE_Milk_Bottle-xlarge.jpg&f=1', qty: 1 }, { id: 4, tokenOwner: 'MilkMan', tokenType: 'Biscuit', image: 'https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIP.7zi3pUhUNEqLMT3p3xygxQHaE8%26pid%3D15.1&f=1',  qty: 1 }] },
-  { type: 'type', name: 'Big Fizz', owner: 'Barrs', prize: 'Bawbag', requiredTokens: [{ id: 5, tokenOwner: 'IrnBru', tokenType: 'IrnBruSpecial', image: 'https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fs-media-cache-ak0.pinimg.com%2F736x%2F77%2F4e%2F3a%2F774e3a9e032eba60ff1cce1f8db1fa16.jpg&f=1', qty: 1 }, { id: 6, tokenOwner: 'IrnBru', tokenType: 'Girders', image: 'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fwww.agbarr.co.uk%2Fmedia%2F288335%2FIRN-BRU-Regular-750ml-16.jpg&f=1', qty: 1 }] }
+  { type: 'type', id: 1, name: 'Free Coffee', owner: 'MilkMan', prize: 'Free Coffee', requiredTokens: [
+    { id: 1, tokenOwner: 'MilkMan', tokenType: 'Coffee', image: constants_1.COFFEE, qty: 5 }
+  ] },
+
+  { type: 'type', id: 2, name: 'Coffee King', owner: 'MilkMan', prize: 'Coffee King', requiredTokens: [
+    { id: 2, tokenOwner: 'MilkMan', tokenType: 'Coffee', image: constants_1.COFFEE, qty: 6 }
+  ] },
+
+  { type: 'type', id: 3, name: 'Tea King', owner: 'MilkMan', prize: 'Tea King', requiredTokens: [
+    { id: 3, tokenOwner: 'MilkMan', tokenType: 'Tea', image: constants_1.TEA, qty: 6 }
+  ] },
+
+  { type: 'type', id: 4, name: 'Biscuit King', owner: 'MilkMan', prize: 'Biscuit King', requiredTokens: [
+    { id: 4, tokenOwner: 'MilkMan', tokenType: 'Biscuit', image: constants_1.BISCUIT, qty: 6 }
+  ] },
+
+  { type: 'type', id: 5, name: 'VIP MilkMan', owner: 'MilkMan', prize: 'VIP MilkMan', requiredTokens: [
+    { id: 5, tokenOwner: 'MilkMan', tokenType: 'Coffee King', image: constants_1.COFFEE_KING, qty: 1 },
+    { id: 6, tokenOwner: 'MilkMan', tokenType: 'Tea King', image: constants_1.TEA_KING, qty: 1 },
+    { id: 7, tokenOwner: 'MilkMan', tokenType: 'Big King', image: constants_1.BISCUIT_KING, qty: 1 }
+  ] },
+
+  { type: 'type', id: 6, name: 'IrnBru Hunter', owner: 'IrnBru', prize: 'IrnBru Hunter', requiredTokens: [
+    { id: 8, tokenOwner: 'IrnBru', tokenType: 'Dundee', image: constants_1.DUNDEE, qty: 1 },
+    { id: 9, tokenOwner: 'IrnBru', tokenType: 'Aberdeen', image: constants_1.ABERDEEN, qty: 1 },
+    { id: 10, tokenOwner: 'IrnBru', tokenType: 'Glasgow', image: constants_1.GLASGOW, qty: 1 },
+    { id: 11, tokenOwner: 'IrnBru', tokenType: 'Edinburgh', image: constants_1.EDINBURGH, qty: 1 },
+  ] },
+
 ];
 
 // We subscribe to the Exchange Events to remove any filled or cancelled orders
@@ -213,6 +242,13 @@ app.get('/filteredrequestsbynames', async function (req, res) {
     console.log('HTTP: GET filter request book by names: ');
     console.log('Current Requests:');
     console.log(requests);
+
+    console.log(tokens)
+
+    if(tokens === undefined){
+      res.status(HTTP_OK_STATUS).send([]);
+      return;
+    }
     //console.log(tokens);
     var tokenJson = tokens.map(token => JSON.parse(token));
     console.log('Filters:')
@@ -325,9 +361,108 @@ app.get('/challenges', async function (req, res) {
     }
 });
 
+/**
+ * GET claim
+ * Extension added by JG for 0x Hackathon
+ */
+app.get('/claim', async function (req, res) {
+
+    var networkIdRaw = req.query.networkId;
+    var claimId = req.query.id;
+    var takerAssetData = req.query.takerAssetData;
+
+    var networkId = parseInt(networkIdRaw, 10);
+    claimId = parseInt(claimId, 10);
+
+    console.log('HTTP: GET claim for Challenge ID: ' + claimId);
+    // console.log(assetData);
+
+    if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
+        console.log("Incorrect Network ID: " + networkId);
+        res.status(HTTP_BAD_REQUEST_STATUS).send({});
+    }
+    else {
+      console.log('Generating Signed Order: ');
+
+      let challenge;
+      for(var i = 0;i < challenges.length;i++){           // Find Challenge details
+        if(challenges[i].id === claimId){
+          challenge = challenges[i];
+          break;
+        }
+      }
+
+      if(!challenge){
+        console.log('Challenge Not Found');
+        res.status(HTTP_BAD_REQUEST_STATUS).send({});
+        return;
+      }
+
+      console.log('Challenge: ')
+      console.log(challenge)
+
+      const provider = new Web3.providers.HttpProvider(
+        "http://127.0.0.1:8545"
+      );
+
+      const web3 = new Web3(provider);
+      const accounts = await web3.eth.getAccounts();
+
+      // Find address of tokenOwner
+      var makerAddress = accounts[0];
+      var tokenId = 1;
+      if(challenge.tokenOwner === 'MilkMan')            // The following is a cheat to get this finished. Woud have to search contract in future.
+        makerAddress = accounts[0];
+
+      // Find token ID of matching prize: 'Free Coffee' for address
+      if(challenge.prize === 'Free Coffee')
+        tokenId = 1;
+
+      const deployedNetwork = Card.networks[50];
+      var contractAddress = deployedNetwork.address;
+
+      const makerAssetData = _0x_js_1.assetDataUtils.encodeERC721AssetData(contractAddress, tokenId);
+
+      const randomExpiration = new _0x_js_1.BigNumber(Date.now() + 1000*60*10).div(1000).ceil();
+
+      const contractAddresses = _0x_contractAddresses.getContractAddressesForNetworkOrThrow(50);
+      const exchangeAddress = contractAddresses.exchange;
+
+      const ZERO = new _0x_js_1.BigNumber(0);
+
+      // Create the order
+      const order = {
+          exchangeAddress,
+          makerAddress: makerAddress.toLowerCase(),
+          takerAddress: NULL_ADDRESS,
+          senderAddress: NULL_ADDRESS,
+          feeRecipientAddress: NULL_ADDRESS,
+          expirationTimeSeconds: randomExpiration,
+          salt: _0x_js_1.generatePseudoRandomSalt(),
+          makerAssetAmount: new _0x_js_1.BigNumber(1),
+          takerAssetAmount: new _0x_js_1.BigNumber(1),
+          makerAssetData: makerAssetData,
+          takerAssetData: takerAssetData,
+          makerFee: ZERO,
+          takerFee: ZERO,
+      };
+
+      const pe = new _0x_js_1.Web3ProviderEngine();
+      pe.addProvider(new _0x_js_1.RPCSubprovider('http://127.0.0.1:8545'));
+      pe.start();
+
+      // Generate the order hash and sign it
+      const orderHashHex = _0x_js_1.orderHashUtils.getOrderHashHex(order);
+      const signature = await _0x_js_1.signatureUtils.ecSignHashAsync(pe, orderHashHex, makerAddress.toLowerCase());
+      const signedOrder = { ...order, signature: signature };
+
+      res.status(HTTP_OK_STATUS).send({signedOrder: signedOrder});
+  }
+});
 
 
-app.listen(HTTP_PORT, function () { return console.log('Standard relayer API (HTTP) listening on port 3000! JOHNS'); });
+
+app.listen(HTTP_PORT, function () { return console.log('JG Extended relayer API (HTTP) listening on port 3000!'); });
 function getCurrentUnixTimestampSec() {
     var milisecondsInSecond = 1000;
     return new _0x_js_1.BigNumber(Date.now() / milisecondsInSecond).round();

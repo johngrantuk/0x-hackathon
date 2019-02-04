@@ -30,7 +30,7 @@ const getAccountInfo = async(web3, networkId, accounts) => {
       var tokenId = indexes[i];
       //console.log('Get Token Metadata');
       var tokenMeta = await instance.methods.getTokenMeta(tokenId).call();
-      console.log('ID: ' + tokenId + ', Balance:' + balances[i] + ' ' + tokenMeta.owner + ' ' + tokenMeta.tokenType + ' ' + tokenMeta.tokenName)
+      // console.log('ID: ' + tokenId + ', Balance:' + balances[i] + ' ' + tokenMeta.owner + ' ' + tokenMeta.tokenType + ' ' + tokenMeta.tokenName)
 
       tokens.push({
         name: tokenMeta.tokenName,
@@ -42,7 +42,7 @@ const getAccountInfo = async(web3, networkId, accounts) => {
         address: deployedNetwork.address
       })
 
-      if(tokenCounts[tokenMeta.tokenType] == undefined){
+      if(tokenCounts[tokenMeta.tokenType] === undefined){
         tokenCounts[tokenMeta.tokenType] = 1;
       }else{
         tokenCounts[tokenMeta.tokenType]++;

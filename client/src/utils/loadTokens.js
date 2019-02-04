@@ -1,11 +1,12 @@
 const Web3 = require('web3');
 const Card = require("../contracts/Card.json");
+var constants = require("../../relayer/constants");
 
 /*
 Helper to load example tokens on Ganache test network.
 */
 
-const load = async() => {
+const loadAccountOld = async() => {
   const provider = new Web3.providers.HttpProvider(
     "http://127.0.0.1:8545"
   );
@@ -15,8 +16,6 @@ const load = async() => {
   // resolve(web3);
 
   const accounts = await web3.eth.getAccounts();
-
-  console.log(accounts[0]);
 
   const deployedNetwork = Card.networks[50];
 
@@ -62,6 +61,27 @@ const load = async() => {
 
 }
 
+const loadAccount0 = async() => {
+  const provider = new Web3.providers.HttpProvider(
+    "http://127.0.0.1:8545"
+  );
+
+  const web3 = new Web3(provider);
+  const accounts = await web3.eth.getAccounts();
+
+  console.log('Loading MilkMan Account: ' + accounts[0]);
+
+  const deployedNetwork = Card.networks[50];
+
+  const instance = new web3.eth.Contract(
+    Card.abi,
+    deployedNetwork && deployedNetwork.address,
+  );
+
+  console.log('Minting...')
+  await instance.methods.mint(1, accounts[0], 'MilkMan', 'Free Coffee', 'Free Coffee 1', constants.FREE_COFFEE).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });;
+}
+
 const loadAccount1 = async() => {
   const provider = new Web3.providers.HttpProvider(
     "http://127.0.0.1:8545"
@@ -80,9 +100,46 @@ const loadAccount1 = async() => {
   );
 
   console.log('Minting...')
-  await instance.methods.mint(101, accounts[1], 'MilkMan', 'Coffee', 'Coffee101', 'https://www.brian-coffee-spot.com/wp-content/uploads/2015/10/Thumbnail-The-Milkman-DSC_1913t-150x200.jpg').send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });;
-  await instance.methods.mint(102, accounts[1], 'MilkMan', 'Milk', 'Milk102', 'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fwww.telegraph.co.uk%2Fcontent%2Fdam%2Fexpat%2F2016%2F03%2F03%2F89992402_D6EEPE_Milk_Bottle-xlarge.jpg&f=1').send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });;
-  await instance.methods.mint(103, accounts[1], 'MilkMan', 'Tea', 'Tea103', 'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fb%2Fb8%2FMug_of_Tea.JPG&f=1').send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });;
+  await instance.methods.mint(101, accounts[1], 'MilkMan', 'Coffee', 'Coffee101', constants.COFFEE).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+  await instance.methods.mint(102, accounts[1], 'MilkMan', 'Coffee', 'Coffee102', constants.COFFEE).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+  await instance.methods.mint(103, accounts[1], 'MilkMan', 'Coffee', 'Coffee103', constants.COFFEE).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+  await instance.methods.mint(104, accounts[1], 'MilkMan', 'Coffee', 'Coffee104', constants.COFFEE).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+  await instance.methods.mint(105, accounts[1], 'MilkMan', 'Coffee', 'Coffee105', constants.COFFEE).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+
+  await instance.methods.mint(111, accounts[1], 'MilkMan', 'Biscuit', 'Biscuit111', constants.BISCUIT).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+  await instance.methods.mint(112, accounts[1], 'MilkMan', 'Biscuit', 'Biscuit112', constants.BISCUIT).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+  await instance.methods.mint(113, accounts[1], 'MilkMan', 'Biscuit', 'Biscuit113', constants.BISCUIT).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+  await instance.methods.mint(114, accounts[1], 'MilkMan', 'Biscuit', 'Biscuit114', constants.BISCUIT).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+  await instance.methods.mint(115, accounts[1], 'MilkMan', 'Biscuit', 'Biscuit115', constants.BISCUIT).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+
+  await instance.methods.mint(121, accounts[1], 'IrnBru', 'Edinburgh', 'Edinburgh121', constants.EDINBURGH).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+}
+
+const loadAccount2 = async() => {
+  const provider = new Web3.providers.HttpProvider(
+    "http://127.0.0.1:8545"
+  );
+
+  const web3 = new Web3(provider);
+  const accounts = await web3.eth.getAccounts();
+
+  console.log('Loading Account2: ' + accounts[2]);
+
+  const deployedNetwork = Card.networks[50];
+
+  const instance = new web3.eth.Contract(
+    Card.abi,
+    deployedNetwork && deployedNetwork.address,
+  );
+
+  console.log('Minting...')
+  await instance.methods.mint(106, accounts[2], 'MilkMan', 'Coffee', 'Coffee106', constants.COFFEE).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+
+  await instance.methods.mint(116, accounts[2], 'MilkMan', 'Biscuit', 'Biscuit116', constants.BISCUIT).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+
+  await instance.methods.mint(122, accounts[2], 'IrnBru', 'Glasgow', 'Glasgow122', constants.GLASGOW).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+  await instance.methods.mint(123, accounts[2], 'IrnBru', 'Aberdeen', 'Aberdeen123', constants.ABERDEEN).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+  await instance.methods.mint(124, accounts[2], 'IrnBru', 'Dundee', 'Dundee124', constants.DUNDEE).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
 }
 
 
@@ -105,4 +162,7 @@ const getTokens = async(ContractInstance, Address) => {
 
 }
 
-loadAccount1();
+console.log(constants.COFFEE)
+loadAccount0();
+//loadAccount1();
+//loadAccount2();

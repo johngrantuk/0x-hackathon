@@ -1,9 +1,8 @@
 import React from 'react';
 import {Col, Row, Button, Modal } from 'react-bootstrap';
-import ChallengeToken from './ChallengeToken';
 import NumericInput from 'react-numeric-input';
 import uuid from 'uuid';
-import { getContractAddress, getTokenMeta } from './utils/contract-helper';
+import { getContractAddress } from './utils/contract-helper';
 import {
     assetDataUtils,
     BigNumber,
@@ -14,7 +13,6 @@ import {
     Web3ProviderEngine
 } from '0x.js';
 import { getContractAddressesForNetworkOrThrow } from '@0x/contract-addresses';
-import { MnemonicWalletSubprovider } from '@0x/subproviders';
 
 let axios = require('axios');
 
@@ -116,9 +114,9 @@ export default class Offer extends React.Component {
     var makerAssets = [];
     var makerTokens = [];
 
-    for(var tokenId in this.makeTokens){
-      var token = this.makeTokens[tokenId];
-      var assetData = assetDataUtils.encodeERC721AssetData(contractAddress, token.id);
+    for(tokenId in this.makeTokens){
+      token = this.makeTokens[tokenId];
+      assetData = assetDataUtils.encodeERC721AssetData(contractAddress, token.id);
       makerQtys.push(new BigNumber(token.offerAmount));
       makerAssets.push(assetData);
       makerTokens.push(token);

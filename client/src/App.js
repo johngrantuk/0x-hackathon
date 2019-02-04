@@ -5,7 +5,7 @@ import Token from './Token';
 import Challenge from './Challenge';
 import Offer from './Offer';
 import uuid from 'uuid';
-import {Col, Row, Button, Modal } from 'react-bootstrap';
+import {Col, Row, Button } from 'react-bootstrap';
 import {ContractWrappers, RPCSubprovider, Web3ProviderEngine, BigNumber } from '0x.js';
 
 // import { Web3Wrapper } from '@0x/web3-wrapper';
@@ -20,7 +20,10 @@ class App extends Component {
     web3: null,
     accounts: null,
     userTokens: [],
-    isProxyApproved: false
+    isProxyApproved: false,
+    challenges: [],
+    filteredRequests: [],
+    offers: []
   };
 
   constructor(props, context) {
@@ -39,58 +42,26 @@ class App extends Component {
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
 
-      var tokenInfo = await getAccountInfo(web3, networkId, accounts);
-      var userTokens = tokenInfo[0];
-      var tokenCounts = tokenInfo[1];
-      //console.log('userTokens:');
-      //console.log(userTokens);
-
-      var tokenFilter = [];
-      for(var i = 0;i < userTokens.length;i++){
-        // console.log(userTokens[i]);
-        tokenFilter.push({tokenOwner: userTokens[i].tokenOwner, tokenType: userTokens[i].tokenType})
-      }
-
-      console.log('tokenFilters: ')
-      console.log(tokenFilter)
-
-      var challenges = await axios.get('http://localhost:3000/challenges', { params: { networkId: networkId}});
-
-      var filteredRequests = await axios.get('http://localhost:3000/filteredrequestsbynames', {
-        params: {
-          networkId: 50,
-          tokens: tokenFilter
-        }
+      this.setState({
+        web3: web3,
+        networkId: networkId,
+        accounts: accounts
       });
 
-      console.log('filteredRequests: ');
-      console.log(filteredRequests.data);
-
-      var offers = await axios.get('http://localhost:3000/alloffers', { params: { networkId: networkId}});
-
-      console.log('Offers: ');
-      console.log(offers.data);
+      //setInterval(() => this.LoadAccountInfo(), 5000);
+      await this.LoadAccountInfo()
 
       const pe = new Web3ProviderEngine();
       pe.addProvider(new RPCSubprovider('http://127.0.0.1:8545'));
       pe.start();
 
-      const contractWrappers = new ContractWrappers(pe, { networkId: 50 });
+      const contractWrappers = new ContractWrappers(pe, { networkId: networkId });
 
       var contractAddress = await getContractAddress();
 
       var isApproved = await contractWrappers.erc721Token.isProxyApprovedForAllAsync(contractAddress, accounts[0]);
 
-      console.log('IsApproved: ' + isApproved);
-
       this.setState({
-        userTokens: userTokens,
-        challenges: challenges.data,
-        tokenCounts: tokenCounts,
-        web3,
-        accounts,
-        filteredRequests: filteredRequests.data,
-        offers: offers.data,
         isProxyApproved: isApproved,
         contractWrappers: contractWrappers,
         contractAddress
@@ -104,6 +75,40 @@ class App extends Component {
       console.error(error);
     }
   };
+
+  async LoadAccountInfo(){
+    var web3 = this.state.web3;
+    var networkId = this.state.networkId;
+    var accounts = this.state.accounts;
+
+    var tokenInfo = await getAccountInfo(web3, networkId, accounts);                                            // Gets tokens for account
+    var userTokens = tokenInfo[0];
+    var tokenCounts = tokenInfo[1];
+
+    var tokenFilter = [];
+    for(var i = 0;i < userTokens.length;i++){
+      tokenFilter.push({tokenOwner: userTokens[i].tokenOwner, tokenType: userTokens[i].tokenType})
+    }
+
+    var challenges = await axios.get('http://localhost:3000/challenges', { params: { networkId: networkId}});   // Gets Challenges for tokens matching users tokens
+
+    var filteredRequests = await axios.get('http://localhost:3000/filteredrequestsbynames', {                   // Get Requests for tokens matching users tokens
+      params: {
+        networkId: networkId,
+        tokens: tokenFilter
+      }
+    });
+
+    var offers = await axios.get('http://localhost:3000/alloffers', { params: { networkId: networkId}});        // Gets all offers available
+
+    this.setState({
+      userTokens: userTokens,
+      tokenCounts: tokenCounts,
+      challenges: challenges.data,
+      filteredRequests: filteredRequests.data,
+      offers: offers.data
+    });
+  }
 
   activateTrading(){
     console.log('Enabling Trading...');
@@ -210,7 +215,7 @@ class App extends Component {
             <Panel.Body>
               <div>
                 {challenges.map(challenge =>
-                  <Challenge key={challenge.name} challenge={challenge} tokenCounts={tokenCounts} userTokens={userTokens} web3={this.state.web3}/>
+                  <Challenge key={challenge.name} challenge={challenge} tokenCounts={tokenCounts} userTokens={userTokens} web3={this.state.web3} account={accounts[0]}/>
                 )}
               </div>
             </Panel.Body>

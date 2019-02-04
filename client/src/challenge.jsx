@@ -3,7 +3,11 @@ import {Col, Row, Button, Modal } from 'react-bootstrap';
 import ChallengeToken from './ChallengeToken';
 import NumericInput from 'react-numeric-input';
 import uuid from 'uuid';
-import { getContractAddress, getTokenMeta } from './utils/contract-helper';
+import { getContractAddress } from './utils/contract-helper';
+import {
+  BigNumber,
+  assetDataUtils, ContractWrappers, RPCSubprovider, Web3ProviderEngine
+} from '0x.js';
 
 let axios = require('axios');
 
@@ -38,8 +42,107 @@ export default class Challenge extends React.Component {
     this.setState({ show: true });
   }
 
-  handleClaim() {
-    console.log('Claiming...')
+  async handleClaim() {
+    console.log('Claiming ID: ' + this.props.challenge.id);
+
+    var contractAddress = await getContractAddress();
+
+    var challengeTokens = this.props.challenge.requiredTokens;
+    /* Array:
+    id: 1
+​​    image: "https://www.brian-coffee-spot.com/wp-content/uploads/2015/10/Thumbnail-The-Milkman-DSC_1913t-150x200.jpg"
+​​    qty: 5
+​​    tokenOwner: "MilkMan"
+​​    tokenType: "Coffee"
+    */
+    var userTokens = this.props.userTokens;
+    /* Array:
+    address: "0xEF478C891C92df523769d2Cbcef3EA9B636Ad43a"
+    balance: "1"
+​​    id: "101"
+​​    image: "constants.COFFEE"
+​​    name: "Coffee101"
+​​    tokenOwner: "MilkMan"
+​​    tokenType: "Coffee"
+    */
+
+    var tokenIds = [];
+    var tokenQtys = [];
+
+    for(var i = 0;i < challengeTokens.length;i++){
+      var requiredQty = challengeTokens[i].qty;
+      var tokenOwner = challengeTokens[i].tokenOwner;
+      var tokenType = challengeTokens[i].tokenType;
+
+      console.log('Checking: ' + tokenOwner + ':' + tokenType + ' Need: ' + requiredQty);
+
+      for(var j = 0;j < userTokens.length;j++){
+
+        if(requiredQty < 0){
+          console.log('Got all required');
+          console.log(tokenIds);
+          break;
+        }
+
+        if(tokenOwner === userTokens[j].tokenOwner && tokenType === userTokens[j].tokenType){
+          requiredQty--;
+          var assetData = assetDataUtils.encodeERC721AssetData(contractAddress, userTokens[j].id);
+          tokenIds.push(assetData);
+          tokenQtys.push(new BigNumber(1));
+        }
+      }
+
+      if(requiredQty > 0){
+        console.log('!!!!! THIS SHOULDN"T HAPPEN')
+      }
+    }
+
+    // console.log('Generate Asset Data:');
+    // console.log(tokenIds);
+
+    // Generate takerMultiAssetData
+    const takerAssetData = assetDataUtils.encodeMultiAssetData(tokenQtys, tokenIds);
+
+    // Send to API
+    var response = await axios.get('http://localhost:3000/claim', {params: {networkId: 50, id: this.props.challenge.id, takerAssetData: takerAssetData}});
+
+    console.log('Response: ' + response.status);
+    console.log(response.data.signedOrder);
+    var signedOrder = response.data.signedOrder;
+    // Reply should contain order
+    // Fill order
+    console.log('Filling Order...')
+    const pe = new Web3ProviderEngine();
+    pe.addProvider(new RPCSubprovider('http://127.0.0.1:8545'));
+    pe.start();
+
+    const contractWrappers = new ContractWrappers(pe, { networkId: 50 });
+    console.log('Filling Order 1...');
+    var acceptedSignedOrder = {
+      exchangeAddress: signedOrder.exchangeAddress,
+      makerAddress: signedOrder.makerAddress,
+      takerAddress: signedOrder.takerAddress,
+      senderAddress: signedOrder.senderAddress,
+      feeRecipientAddress: signedOrder.feeRecipientAddress,
+      expirationTimeSeconds: new BigNumber(signedOrder.expirationTimeSeconds),
+      salt: new BigNumber(signedOrder.salt),
+      makerAssetAmount: new BigNumber(signedOrder.makerAssetAmount),
+      takerAssetAmount: new BigNumber(signedOrder.takerAssetAmount),
+      makerAssetData: signedOrder.makerAssetData,
+      takerAssetData: signedOrder.takerAssetData,
+      makerFee: new BigNumber(signedOrder.makerFee),
+      takerFee: new BigNumber(signedOrder.takerFee),
+      signature: signedOrder.signature
+    }
+
+    console.log(acceptedSignedOrder)
+    // Fill the Order via 0x.js Exchange contract
+    var txHash = await contractWrappers.exchange.fillOrderAsync(acceptedSignedOrder, acceptedSignedOrder.takerAssetAmount, this.props.account, {
+        gasLimit: 400000,
+    });
+
+    console.log('Order Filled??');
+    pe.stop();
   }
 
   handleClose() {
@@ -106,7 +209,6 @@ export default class Challenge extends React.Component {
 
       console.log('Response: ' + response.status);
 
-      var relayRequestId = response.data.id;
     }
 
     this.setState({show: false});
@@ -118,7 +220,6 @@ export default class Challenge extends React.Component {
     var challengeTokens = this.props.challenge.requiredTokens;
     var tokenCounts = this.props.tokenCounts;
     var challengeComplete = this.state.challengeComplete;
-    var userTokens = this.props.userTokens;
 
     var button = <Button bsStyle="primary"  onClick={this.handleClaim}>CLAIM</Button>;
     if(!challengeComplete){
