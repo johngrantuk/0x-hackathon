@@ -33,6 +33,7 @@ class App extends Component {
 
   componentDidMount = async () => {
     try {
+      console.log('Mount');
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
 
@@ -235,7 +236,7 @@ class App extends Component {
             <Panel.Body>
               <div>
                 {challenges.map(challenge =>
-                  <Challenge key={challenge.name} challenge={challenge} tokenCounts={tokenCounts} userTokens={userTokens} web3={this.state.web3} account={accounts[0]} isProxyApproved={isProxyApproved} loadAccountInfo={this.LoadAccountInfo()} />
+                  <Challenge key={challenge.name} challenge={challenge} tokenCounts={tokenCounts} userTokens={userTokens} web3={this.state.web3} account={accounts[0]} isProxyApproved={isProxyApproved} />
                 )}
               </div>
             </Panel.Body>

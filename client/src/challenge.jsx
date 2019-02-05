@@ -143,8 +143,6 @@ export default class Challenge extends React.Component {
 
     console.log('Order Filled??');
     pe.stop();
-
-    this.props.loadAccountInfo();
   }
 
   handleClose() {
