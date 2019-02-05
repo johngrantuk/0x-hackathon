@@ -1,7 +1,7 @@
 import React from 'react';
 import {Col, Panel } from 'react-bootstrap';
 
-export default class Token extends React.Component {
+export default class Offers extends React.Component {
 
     render() {
 
@@ -26,4 +26,4 @@ export default class Token extends React.Component {
         </div>
       );
     }
-}
+  }

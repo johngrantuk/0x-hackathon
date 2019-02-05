@@ -1,5 +1,5 @@
 import React from 'react';
-import {Col, Row, Button, Modal } from 'react-bootstrap';
+import {Col, Row, Button, Modal, Alert, Panel } from 'react-bootstrap';
 import ChallengeToken from './ChallengeToken';
 import NumericInput from 'react-numeric-input';
 import uuid from 'uuid';
@@ -143,6 +143,8 @@ export default class Challenge extends React.Component {
 
     console.log('Order Filled??');
     pe.stop();
+
+    this.props.loadAccountInfo();
   }
 
   handleClose() {
@@ -220,24 +222,41 @@ export default class Challenge extends React.Component {
     var challengeTokens = this.props.challenge.requiredTokens;
     var tokenCounts = this.props.tokenCounts;
     var challengeComplete = this.state.challengeComplete;
+    var isProxyApproved = this.props.isProxyApproved;
 
-    var button = <Button bsStyle="primary"  onClick={this.handleClaim}>CLAIM</Button>;
-    if(!challengeComplete){
-      button = <Button bsStyle="primary"  onClick={this.handleBuy}>TRADE TOKENS</Button>;
+    var button = <Alert variant='primary'>Activate Trading To Claim Your Rewards</Alert>
+
+    if(isProxyApproved){
+      button = <Button bsStyle="primary"  onClick={this.handleClaim}>CLAIM</Button>;
+      if(!challengeComplete){
+        button = <Button bsStyle="primary"  onClick={this.handleBuy}>TRADE TOKENS</Button>;
+      }
     }
 
     return(
       <div>
         <Row className="show-grid">
-          <Col sm={1} md={1} lg={1}>
-            <h2>{ challenge.name }</h2>
-          </Col>
+          <h3>{ challenge.name } by { challenge.owner }</h3>
           {challengeTokens.map(token =>
               <ChallengeToken key={ uuid.v4() } token={ token } tokenCount={tokenCounts[token.tokenType]} challengeComplete={challengeComplete} challengeNotComplete={this.challengeNotComplete}/>
           )}
-          <Col sm={1} md={1} lg={1}>
-              { button }
+
+        </Row>
+        <Row>
+          <h4>Reward-{ challenge.name }</h4>
+          <Col key={ uuid.v4() } sm={2} smOffset={5} md={2} mdOffset={5} lg={2} lgOffset={5}>
+            <Panel>
+              <Panel.Body>
+                <div style={{"height" : "100px"}}>
+                  <img role="presentation" style={{"width" : "100%", "height" : "100%"}} src={challenge.image}/>
+                </div>
+                <strong>{challenge.name} </strong>
+              </Panel.Body>
+            </Panel>
           </Col>
+        </Row>
+        <Row>
+          { button }
         </Row>
 
         <Modal show={this.state.show} onHide={this.handleClose}>
@@ -260,22 +279,6 @@ export default class Challenge extends React.Component {
                 </Col>
               </Row>
             )}
-            {/*
-            Trade:
-            {userTokens.map(token =>
-              <Row key={uuid.v4()}>
-                <Col sm={1} md={1} lg={1}>
-                  <img role="presentation" style={{"width" : "100%"}} src={token.image}/>
-                  <strong>{token.tokenOwner} </strong> <span>{token.tokenType}</span><br/>
-                </Col>
-                <Col sm={1} md={1} lg={1}>
-                  Qty
-                  <NumericInput className={token.tokenType} min={0} max={1} value={0} onChange={this.handleTradeQty}/>
-
-                </Col>
-              </Row>
-            )}
-            */}
 
             <h2>Your Request Will Be Sent And Offers Returned</h2>
 

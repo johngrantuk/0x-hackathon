@@ -21,29 +21,29 @@ var offers = [];
 var ordersByHash = {};
 var requests = [];
 var challenges = [
-  { type: 'type', id: 1, name: 'Free Coffee', owner: 'MilkMan', prize: 'Free Coffee', requiredTokens: [
+  { type: 'type', id: 1, name: 'Free Coffee', owner: 'MilkMan', prize: 'Free Coffee', image: constants_1.FREE_COFFEE, requiredTokens: [
     { id: 1, tokenOwner: 'MilkMan', tokenType: 'Coffee', image: constants_1.COFFEE, qty: 5 }
   ] },
 
-  { type: 'type', id: 2, name: 'Coffee King', owner: 'MilkMan', prize: 'Coffee King', requiredTokens: [
+  { type: 'type', id: 2, name: 'Coffee King', owner: 'MilkMan', prize: 'Coffee King', image: constants_1.COFFEE_KING, requiredTokens: [
     { id: 2, tokenOwner: 'MilkMan', tokenType: 'Coffee', image: constants_1.COFFEE, qty: 6 }
   ] },
 
-  { type: 'type', id: 3, name: 'Tea King', owner: 'MilkMan', prize: 'Tea King', requiredTokens: [
+  { type: 'type', id: 3, name: 'Tea King', owner: 'MilkMan', prize: 'Tea King', image: constants_1.TEA_KING, requiredTokens: [
     { id: 3, tokenOwner: 'MilkMan', tokenType: 'Tea', image: constants_1.TEA, qty: 6 }
   ] },
 
-  { type: 'type', id: 4, name: 'Biscuit King', owner: 'MilkMan', prize: 'Biscuit King', requiredTokens: [
+  { type: 'type', id: 4, name: 'Biscuit King', owner: 'MilkMan', prize: 'Biscuit King', image: constants_1.BISCUIT_KING, requiredTokens: [
     { id: 4, tokenOwner: 'MilkMan', tokenType: 'Biscuit', image: constants_1.BISCUIT, qty: 6 }
   ] },
 
-  { type: 'type', id: 5, name: 'VIP MilkMan', owner: 'MilkMan', prize: 'VIP MilkMan', requiredTokens: [
+  { type: 'type', id: 5, name: 'VIP MilkMan', owner: 'MilkMan', prize: 'VIP MilkMan', image: constants_1.VIP, requiredTokens: [
     { id: 5, tokenOwner: 'MilkMan', tokenType: 'Coffee King', image: constants_1.COFFEE_KING, qty: 1 },
     { id: 6, tokenOwner: 'MilkMan', tokenType: 'Tea King', image: constants_1.TEA_KING, qty: 1 },
     { id: 7, tokenOwner: 'MilkMan', tokenType: 'Big King', image: constants_1.BISCUIT_KING, qty: 1 }
   ] },
 
-  { type: 'type', id: 6, name: 'IrnBru Hunter', owner: 'IrnBru', prize: 'IrnBru Hunter', requiredTokens: [
+  { type: 'type', id: 6, name: 'IrnBru Hunter', owner: 'IrnBru', prize: 'IrnBru Hunter', image: constants_1.HUNTER, requiredTokens: [
     { id: 8, tokenOwner: 'IrnBru', tokenType: 'Dundee', image: constants_1.DUNDEE, qty: 1 },
     { id: 9, tokenOwner: 'IrnBru', tokenType: 'Aberdeen', image: constants_1.ABERDEEN, qty: 1 },
     { id: 10, tokenOwner: 'IrnBru', tokenType: 'Glasgow', image: constants_1.GLASGOW, qty: 1 },
@@ -411,15 +411,28 @@ app.get('/claim', async function (req, res) {
       // Find address of tokenOwner
       var makerAddress = accounts[0];
       var tokenId = 1;
-      if(challenge.tokenOwner === 'MilkMan')            // The following is a cheat to get this finished. Woud have to search contract in future.
+      if(challenge.tokenOwner === 'MilkMan' || challenge.tokenOwner === 'IrnBru')            // The following is a cheat to get this finished. Woud have to search contract in future.
         makerAddress = accounts[0];
+
+      const deployedNetwork = Card.networks[50];
+      var contractAddress = deployedNetwork.address;
+
+      const requesterERC721ApprovalTxHash = await contractWrappers.erc721Token.setProxyApprovalForAllAsync(
+          contractAddress,
+          makerAddress,
+          true,
+      );
 
       // Find token ID of matching prize: 'Free Coffee' for address
       if(challenge.prize === 'Free Coffee')
         tokenId = 1;
+      else if(challenge.prize === 'IrnBru Hunter'){
+        tokenId = 2;
+      }
+      else if(challenge.prize === 'Coffee King'){
+        tokenId = 3;
+      }
 
-      const deployedNetwork = Card.networks[50];
-      var contractAddress = deployedNetwork.address;
 
       const makerAssetData = _0x_js_1.assetDataUtils.encodeERC721AssetData(contractAddress, tokenId);
 

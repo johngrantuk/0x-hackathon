@@ -26,10 +26,11 @@ export default class ChallengeToken extends React.Component {
         tokens.push(
           <Col key={ uuid.v4() } sm={2} md={2} lg={2}>
             <Panel style={isOwnedStyle}>
-              <Panel.Heading>
-                <Panel.Title componentClass="h3"><img role="presentation" style={{"width" : "100%"}} src={token.image}/></Panel.Title>
-              </Panel.Heading>
+
               <Panel.Body>
+                <div style={{"height" : "100px"}}>
+                  <img role="presentation" style={{"width" : "100%", "height" : "100%"}} src={token.image}/>
+                </div>
                 <strong>{token.tokenOwner} </strong> <span>{token.tokenType}</span><br/>
                 {isOwned}
               </Panel.Body>

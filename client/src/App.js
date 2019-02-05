@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import getWeb3 from "./utils/getWeb3";
-import { Panel } from 'react-bootstrap';
+import { Panel, Alert } from 'react-bootstrap';
 import Token from './Token';
 import Challenge from './Challenge';
 import Offer from './Offer';
@@ -49,7 +49,7 @@ class App extends Component {
       });
 
       //setInterval(() => this.LoadAccountInfo(), 5000);
-      await this.LoadAccountInfo()
+      await this.LoadAccountInfo();
 
       const pe = new Web3ProviderEngine();
       pe.addProvider(new RPCSubprovider('http://127.0.0.1:8545'));
@@ -110,9 +110,17 @@ class App extends Component {
     });
   }
 
-  activateTrading(){
+  async activateTrading(){
     console.log('Enabling Trading...');
     this.SetProxy();
+    //window.location.reload();
+    await this.LoadAccountInfo();
+
+    var isApproved = await this.state.contractWrappers.erc721Token.isProxyApprovedForAllAsync(this.state.contractAddress, this.state.accounts[0]);
+
+    this.setState({
+      isProxyApproved: isApproved,
+    });
   }
 
   async SetProxy(){
@@ -163,6 +171,8 @@ class App extends Component {
 
     console.log('Order Filled??');
     pe.stop();
+
+    await this.LoadAccountInfo();
   }
 
   render() {
@@ -176,7 +186,7 @@ class App extends Component {
 
     var trade = (<Panel>
                   <Panel.Heading>
-                    <Panel.Title componentClass="h3">ENABLE TRADING</Panel.Title>
+                    <Panel.Title componentClass="h3">ACTIVATE TRADING</Panel.Title>
                   </Panel.Heading>
                   <Panel.Body>
                     <Button bsStyle="primary"  onClick={() => this.activateTrading()}>ACTIVATE TRADING</Button>
@@ -191,13 +201,21 @@ class App extends Component {
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
+
+    var requests = <Alert variant='primary'>Activate Trading To See Token Requests - Someone Might Want Some of Yours!</Alert>
+    if(isProxyApproved){
+      requests = (filteredRequests.map(request =>
+        <Offer key={request.id} request={request} userTokens={userTokens} web3={this.state.web3} account={accounts[0]}/>
+      ))
+    }
+
     return (
       <div className="App">
 
         <div>
           <Panel>
             <Panel.Heading>
-              <Panel.Title componentClass="h3">YOUR TOKENS {accounts[0]}</Panel.Title>
+              <Panel.Title componentClass="h3">YOUR TOKENS<br/> {accounts[0]}</Panel.Title>
             </Panel.Heading>
             <Panel.Body>
               <div>
@@ -208,29 +226,27 @@ class App extends Component {
             </Panel.Body>
           </Panel>
 
+          { trade }
+
           <Panel>
             <Panel.Heading>
-              <Panel.Title componentClass="h3">AVAILABLE CHALLENGES</Panel.Title>
+              <Panel.Title componentClass="h3">AVAILABLE REWARDS</Panel.Title>
             </Panel.Heading>
             <Panel.Body>
               <div>
                 {challenges.map(challenge =>
-                  <Challenge key={challenge.name} challenge={challenge} tokenCounts={tokenCounts} userTokens={userTokens} web3={this.state.web3} account={accounts[0]}/>
+                  <Challenge key={challenge.name} challenge={challenge} tokenCounts={tokenCounts} userTokens={userTokens} web3={this.state.web3} account={accounts[0]} isProxyApproved={isProxyApproved} loadAccountInfo={this.LoadAccountInfo()} />
                 )}
               </div>
             </Panel.Body>
           </Panel>
-
-          { trade }
 
           <Panel>
             <Panel.Heading>
               <Panel.Title componentClass="h3">OPEN REQUESTS</Panel.Title>
             </Panel.Heading>
             <Panel.Body>
-              {filteredRequests.map(request =>
-                <Offer key={request.id} request={request} userTokens={userTokens} web3={this.state.web3} account={accounts[0]}/>
-              )}
+              { requests }
             </Panel.Body>
           </Panel>
 
@@ -240,17 +256,18 @@ class App extends Component {
             </Panel.Heading>
             <Panel.Body>
               {offers.map(offer =>
-                <Row key={uuid.v4()}>
-                  <Col sm={1} md={1} lg={1}>
-                    <h1>GET: </h1>
-                  </Col>
+              <div key={uuid.v4()}>
+                <Row>
+                  <h3>GET: </h3>
+                </Row>
+                <Row>
                   {offer.MakerTokens.map(offerToken =>
                     <Col key={uuid.v4()} sm={2} md={2} lg={2}>
                       <Panel>
-                        <Panel.Heading>
-                          <Panel.Title componentClass="h3"><img role="presentation" style={{"width" : "100%"}} src={offerToken.image}/></Panel.Title>
-                        </Panel.Heading>
                         <Panel.Body>
+                          <div style={{"height" : "100px"}}>
+                            <img role="presentation" style={{"width" : "100%", "height" : "100%"}} src={offerToken.image}/>
+                          </div>
                           <strong>{offerToken.tokenOwner}</strong>
                           <br/>
                           <span>{offerToken.tokenType}</span>
@@ -260,32 +277,32 @@ class App extends Component {
                       </Panel>
                     </Col>
                   )}
-
-                  <Col sm={1} md={1} lg={1}>
-                    <h1>FOR: </h1>
-                  </Col>
-
-                  {offer.TakerTokens.map(offerToken =>
-                    <Col key={uuid.v4()} sm={2} md={2} lg={2}>
-                      <Panel>
-                        <Panel.Heading>
-                          <Panel.Title componentClass="h3"><img role="presentation" style={{"width" : "100%"}} src={offerToken.image}/></Panel.Title>
-                        </Panel.Heading>
-                        <Panel.Body>
-                          <strong>{offerToken.tokenOwner}</strong>
-                          <br/>
-                          <span>{offerToken.tokenType}</span>
-                          <br/>
-                          <span>{offerToken.id}</span>
-                        </Panel.Body>
-                      </Panel>
-                    </Col>
-                  )}
-
-                  <Col sm={2} md={2} lg={2}>
-                    <Button bsStyle="primary"  onClick={(e) => this.acceptOffer(e, offer)}>ACCEPT OFFER</Button>
-                  </Col>
                 </Row>
+                <Row>
+                  <h3>FOR: </h3>
+                </Row>
+                <Row>
+                    {offer.TakerTokens.map(offerToken =>
+                      <Col key={uuid.v4()} sm={2} md={2} lg={2}>
+                        <Panel>
+                          <Panel.Body>
+                            <div style={{"height" : "100px"}}>
+                              <img role="presentation" style={{"width" : "100%", "height" : "100%"}} src={offerToken.image}/>
+                            </div>
+                            <strong>{offerToken.tokenOwner}</strong>
+                            <br/>
+                            <span>{offerToken.tokenType}</span>
+                            <br/>
+                            <span>{offerToken.id}</span>
+                          </Panel.Body>
+                        </Panel>
+                      </Col>
+                    )}
+                </Row>
+                <Row>
+                  <Button bsStyle="primary"  onClick={(e) => this.acceptOffer(e, offer)}>ACCEPT OFFER</Button>
+                </Row>
+              </div>
               )}
             </Panel.Body>
           </Panel>
