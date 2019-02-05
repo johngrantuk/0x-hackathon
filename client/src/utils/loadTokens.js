@@ -164,5 +164,5 @@ const getTokens = async(ContractInstance, Address) => {
 
 console.log(constants.COFFEE)
 loadAccount0();
-//loadAccount1();
-//loadAccount2();
+loadAccount1();
+loadAccount2();
