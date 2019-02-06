@@ -1,4 +1,4 @@
-import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByName, getFilteredRequestBookByName} from "../client/src/utils/request-helper";
+import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByType, getFilteredRequestBookByName} from "../client/src/utils/request-helper";
 
 const Card = artifacts.require("./Card.sol");
 
@@ -76,7 +76,7 @@ contract("Requests Util Tests...", accounts => {
   it("...should return null for non order name", async () => {
     const cardInstance = await Card.deployed();
 
-    var retrievedRequest = await getRequestByName(requests, 'Nope', 'Nope');
+    var retrievedRequest = await getRequestByType(requests, 'Nope', 'Nope');
 
     assert.equal(retrievedRequest, null);
   });
@@ -84,8 +84,8 @@ contract("Requests Util Tests...", accounts => {
   it("...should return requests matching name", async () => {
     const cardInstance = await Card.deployed();
 
-    var requestResults = await getRequestByName(requests, 'Milk Man', 'Coffee');
-    
+    var requestResults = await getRequestByType(requests, 'Milk Man', 'Coffee');
+
     assert.equal(requestResults.length, 2, 'Should have 2 requests.');
     assert.equal(requestResults[0].tokenOwner, 'Milk Man');
     assert.equal(requestResults[1].tokenOwner, 'Milk Man');

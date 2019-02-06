@@ -1,4 +1,4 @@
-import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByName, getFilteredRequestBookByName} from "../client/src/utils/request-helper";
+import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByType, getFilteredRequestBookByName} from "../client/src/utils/request-helper";
 let axios = require('axios');
 const Card = artifacts.require("./Card.sol");
 
@@ -52,7 +52,7 @@ contract("Server Tests...", accounts => {
     var response;
 
     try{
-      response = await axios.get('http://localhost:3000/requestsbytype', {
+      response = await axios.get('http://localhost:3000/requestsbyname', {
         params: {
           networkId: 50,
           tokenOwner: 'MilkMan',

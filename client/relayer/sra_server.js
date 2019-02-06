@@ -152,7 +152,7 @@ app.post('/v2/order', function (req, res) {
  * GET requestsbyname endpoint retrieves the requests matching tokenName
  * Extension added by JG for 0x Hackathon
  */
-app.get('/requestsbytype', async function (req, res) {
+app.get('/requestsbyname', async function (req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -170,18 +170,19 @@ app.get('/requestsbytype', async function (req, res) {
         res.status(HTTP_BAD_REQUEST_STATUS).send({});
     }
     else {
-        //var requestsByType = getRequestByName(requests, tokenOwner, tokenType);
-        var requestsByType = await requestHelper.getRequestByName(requests, tokenOwner, tokenType);
-        console.log(requestsByType);
-        res.status(HTTP_OK_STATUS).send(requestsByType);
+        //var requestsByName = getRequestByType(requests, tokenOwner, tokenType);
+        var requestsByName = await requestHelper.getRequestByType(requests, tokenOwner, tokenType);
+        console.log(requestsByName);
+        res.status(HTTP_OK_STATUS).send(requestsByName);
     }
 });
+
 /**
  * GET requestbyid endpoint retrieves the request matching ID
  * Extension added by JG for 0x Hackathon
  */
 app.get('/requestbyid', async function (req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -202,6 +203,7 @@ app.get('/requestbyid', async function (req, res) {
         res.status(HTTP_OK_STATUS).send(request);
     }
 });
+
 /**
  * POST request endpoint submits a request to the Relayer.
  * Extension added by JG for 0x Hackathon

@@ -9,11 +9,13 @@ To make this even more interesting the Dapp allows users to make requests for NF
 
 # The Parts
 
-## Contract ERC721x
 
 ## Relayer
-Based on the 0x-starter-project partial relayer.
-Extended to accept requests for trade.
+Based on the 0x-starter-project partial relayer example.
+Extended the endpoints to enable users to make requests and offers for tokens.
+* GET, /requestsbyname - retrieves the requests matching tokenName ??????
+
+Code is under ./client/relayer.
 
 ## Dapp
 
@@ -22,6 +24,14 @@ Time was limited but possible additions would include:
 * UI page for users to create a challenge.
 * Add QR scanner functionality to enable scanning of purchases to claim NFTs. i.e. a user buys a coffee which has a QR code that allows the user to claim the NFT.
 * Add metatransactions so that a new user can be on-boarded easily. Once they have some NFTs and see potential requests this would encourage them to 'upgrade' to a proper Web3 browser.
+
+## 0x
+
+
+
+## Contract - ERC721x
+
+Based on the ERC721x standard from Loom ([Understanding ERC721x Token Standard](https://medium.com/loom-network/understanding-erc721x-token-standard-204eee74b8e8)). It's Loom’s extension of ERC721. It’s an ERC721-compatible token that supports multiple fungible classes.
 
 
 # Instructions To Run

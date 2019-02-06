@@ -62,7 +62,7 @@ const getRequest = async(RequestsArray, Id) => {
   return request;
 }
 
-const getRequestByName = async(RequestsArray, Owner, TokenType) => {
+const getRequestByType = async(RequestsArray, Owner, TokenType) => {
 
   var requestResults = RequestsArray.filter(request => {
     return request.tokenOwner === Owner && request.tokenType === TokenType;
@@ -138,7 +138,7 @@ function parseHTTPOrder(signedOrder) {
 module.exports = {
   addRequest,
   getRequest,
-  getRequestByName,
+  getRequestByType,
   getFilteredRequestBook,
   addOffer,
   getFilteredOffersBook,
