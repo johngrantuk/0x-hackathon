@@ -5,7 +5,7 @@ In Token Squirrel the reward itself is an NFT and the reward claim process uses 
 
 To make this even more interesting the Dapp allows users to make requests for NFTs they want that other users can then make an exchange offer. The exchange of NFTs between the users also uses a 0x order and bundles of NFTs can be exchanged using MultiAssetData. The idea is that this trading options helps to generate liquidity and also enables natural price discovery.
 
-[Watch a demo here.](http://localhost:3001)
+[Watch a demo here.](https://youtu.be/_jllgudGsKo)
 
 # The Parts
 
