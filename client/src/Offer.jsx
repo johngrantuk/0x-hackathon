@@ -32,33 +32,34 @@ export default class Offer extends React.Component {
       this.makeTokens = {};
   }
 
+  // Opens offer Modal
   createOffer() {
     this.setState({ show: true });
   }
 
+  // Closes offer Modal
   handleClose() {
     this.setState({ show: false });
   }
 
+  // Updates make token qty
   updateMakeTokens(qty, token){
     token.offerAmount = qty;
-    console.log('Make Token: ')
-    console.log(token)
-    console.log(qty)
     this.makeTokens[token.id] = token;
   }
 
-  test(qty, token){
+  // Updates want (taker) token qty
+  updateWantTokens(qty, token){
     token.offerAmount = qty;
-    console.log(token)
-    console.log(qty)
     this.offerTokens[token.id] = token;
   }
 
+  // User makes offer click
   makeOffer(){
     this.SendOffer();
   }
 
+  // Creates a signed order with desired token info then submits to Relayer
   async SendOffer(){
     var request = this.props.request;
     console.log('Make Offer');
@@ -93,12 +94,6 @@ export default class Offer extends React.Component {
     var takerQtys = [];
     var takerAssets = [];
     var offers = [];
-    /*
-    for(var tokenId in this.offerTokens){
-      var token = this.offerTokens[tokenId];
-      offers.push(token);
-    }
-    */
 
     for(var tokenId in this.offerTokens){
       var token = this.offerTokens[tokenId];
@@ -176,6 +171,8 @@ export default class Offer extends React.Component {
     this.setState({show: false});
     // this.SendRequests(swapTokens);
     pe.stop();
+
+    this.props.refreshPage();
   }
 
   render() {
@@ -222,7 +219,7 @@ export default class Offer extends React.Component {
                 </Col>
                 <Col sm={1} md={1} lg={1}>
                   Qty
-                  <NumericInput className={token.id.toString()} min={0} max={3} value={0} onChange={(e) => this.test(e, token)}/>
+                  <NumericInput className={token.id.toString()} min={0} max={3} value={0} onChange={(e) => this.updateWantTokens(e, token)}/>
                 </Col>
               </Row>
             )}

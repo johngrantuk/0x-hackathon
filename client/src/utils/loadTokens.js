@@ -82,6 +82,7 @@ const loadAccount0 = async() => {
   await instance.methods.mint(1, accounts[0], 'MilkMan', 'Free Coffee', 'Free Coffee 1', constants.FREE_COFFEE).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
   await instance.methods.mint(2, accounts[0], 'IrnBru', 'IrnBru Hunter', 'IrnBru Hunter 1', constants.HUNTER).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
   await instance.methods.mint(3, accounts[0], 'MilkMan', 'Coffee King', 'Coffee King 1', constants.COFFEE_KING).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
+  await instance.methods.mint(4, accounts[0], 'MilkMan', 'Biscuit King', 'Biscuit King 1', constants.BISCUIT_KING).send({ from: accounts[0], gas: 4712388, gasPrice: 100000000000 });
 }
 
 const loadAccount1 = async() => {

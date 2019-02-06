@@ -294,7 +294,7 @@ app.get('/claim', async function (req, res) {
     var networkId = parseInt(networkIdRaw, 10);
     claimId = parseInt(claimId, 10);
 
-    console.log('\nHTTP GET: claim for Challenge ID: ' + claimId);
+    console.log('\nHTTP GET: /claim for Challenge ID: ' + claimId);
 
     if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
         console.log("Incorrect Network ID: " + networkId);
@@ -349,6 +349,11 @@ app.get('/claim', async function (req, res) {
       else if(challenge.prize === 'Coffee King'){
         tokenId = 3;
       }
+      else if(challenge.prize === 'Biscuit King'){
+        tokenId = 4;
+      }
+
+      console.log('Challenge Owner: ' + makerAddress + ' TokenId: ' + tokenId);
 
       // Maker Asset - this is the 'Reward' token that the Challenge creator owns
       const makerAssetData = _0x_js_1.assetDataUtils.encodeERC721AssetData(contractAddress, tokenId);
@@ -359,6 +364,8 @@ app.get('/claim', async function (req, res) {
       const exchangeAddress = contractAddresses.exchange;
 
       const ZERO = new _0x_js_1.BigNumber(0);
+
+      console.log('Encoded Asset Data.');
 
       // Create the order
       const order = {
@@ -381,10 +388,14 @@ app.get('/claim', async function (req, res) {
       pe.addProvider(new _0x_js_1.RPCSubprovider('http://127.0.0.1:8545'));
       pe.start();
 
+      console.log('Signing order...');
+
       // Generate the order hash and sign it
       const orderHashHex = _0x_js_1.orderHashUtils.getOrderHashHex(order);
       const signature = await _0x_js_1.signatureUtils.ecSignHashAsync(pe, orderHashHex, makerAddress.toLowerCase());
       const signedOrder = { ...order, signature: signature };
+
+      console.log('Order Signed, returning to user...')
 
       // Sends the signed order back to the user on the Dapp so they can fill it
       res.status(HTTP_OK_STATUS).send({signedOrder: signedOrder});

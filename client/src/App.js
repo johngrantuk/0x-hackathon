@@ -8,7 +8,6 @@ import uuid from 'uuid';
 import {Col, Row, Button } from 'react-bootstrap';
 import {ContractWrappers, RPCSubprovider, Web3ProviderEngine, BigNumber } from '0x.js';
 
-// import { Web3Wrapper } from '@0x/web3-wrapper';
 import "./App.css";
 
 import { getAccountInfo, getContractAddress } from './utils/contract-helper';
@@ -33,7 +32,6 @@ class App extends Component {
 
   componentDidMount = async () => {
     try {
-      console.log('Mount');
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
 
@@ -50,17 +48,17 @@ class App extends Component {
       });
 
       //setInterval(() => this.LoadAccountInfo(), 5000);
-      await this.LoadAccountInfo();
+      await this.LoadAccountInfo();                                                                                             // Loads account token info, etc
 
       const pe = new Web3ProviderEngine();
       pe.addProvider(new RPCSubprovider('http://127.0.0.1:8545'));
       pe.start();
 
-      const contractWrappers = new ContractWrappers(pe, { networkId: networkId });
+      const contractWrappers = new ContractWrappers(pe, { networkId: networkId });                                              // 0x contract wrappers
 
       var contractAddress = await getContractAddress();
 
-      var isApproved = await contractWrappers.erc721Token.isProxyApprovedForAllAsync(contractAddress, accounts[0]);
+      var isApproved = await contractWrappers.erc721Token.isProxyApprovedForAllAsync(contractAddress, accounts[0]);             // Check that current account has been approved
 
       this.setState({
         isProxyApproved: isApproved,
@@ -77,7 +75,12 @@ class App extends Component {
     }
   };
 
-  async LoadAccountInfo(){
+  refreshPage = () => {
+    this.LoadAccountInfo();
+  }
+
+  // Loads users tokens, challenges, available requests and offers
+  async LoadAccountInfo (){
     var web3 = this.state.web3;
     var networkId = this.state.networkId;
     var accounts = this.state.accounts;
@@ -86,12 +89,20 @@ class App extends Component {
     var userTokens = tokenInfo[0];
     var tokenCounts = tokenInfo[1];
 
+    this.setState({
+      userTokens: userTokens,
+      tokenCounts: tokenCounts,
+    });
+
+    var challenges = await axios.get('http://localhost:3000/challenges', { params: { networkId: networkId}});   // Gets all Challenges (instead of filtering decided to get all as it makes it more interesting to user?)
+    this.setState({
+      challenges: challenges.data,
+    });
+
     var tokenFilter = [];
     for(var i = 0;i < userTokens.length;i++){
-      tokenFilter.push({tokenOwner: userTokens[i].tokenOwner, tokenType: userTokens[i].tokenType})
+      tokenFilter.push({tokenOwner: userTokens[i].tokenOwner, tokenType: userTokens[i].tokenType})              // Creating token filter for pulling info from Relayer
     }
-
-    var challenges = await axios.get('http://localhost:3000/challenges', { params: { networkId: networkId}});   // Gets Challenges for tokens matching users tokens
 
     var filteredRequests = await axios.get('http://localhost:3000/filteredrequestsbytypes', {                   // Get Requests for tokens matching users tokens
       params: {
@@ -100,54 +111,59 @@ class App extends Component {
       }
     });
 
+    this.setState({
+      filteredRequests: filteredRequests.data
+    });
+
     var offers = await axios.get('http://localhost:3000/alloffers', { params: { networkId: networkId}});        // Gets all offers available
 
     this.setState({
-      userTokens: userTokens,
-      tokenCounts: tokenCounts,
-      challenges: challenges.data,
-      filteredRequests: filteredRequests.data,
       offers: offers.data
     });
   }
 
+  // Account must be approved for 0x
   async activateTrading(){
     console.log('Enabling Trading...');
     this.SetProxy();
-    //window.location.reload();
-    await this.LoadAccountInfo();
+  }
+
+  // Use 0x contract wrapper to approve erc721
+  async SetProxy(){
+    await this.state.contractWrappers.erc721Token.setProxyApprovalForAllAsync(
+        this.state.contractAddress,
+        this.state.accounts[0],
+        true,
+    );
 
     var isApproved = await this.state.contractWrappers.erc721Token.isProxyApprovedForAllAsync(this.state.contractAddress, this.state.accounts[0]);
+
+    console.log(isApproved);
 
     this.setState({
       isProxyApproved: isApproved,
     });
   }
 
-  async SetProxy(){
-    const requesterERC721ApprovalTxHash = await this.state.contractWrappers.erc721Token.setProxyApprovalForAllAsync(
-        this.state.contractAddress,
-        this.state.accounts[0],
-        true,
-    );
-  }
-
+  // User has clicked to accept an offer
   acceptOffer(e, Offer){
     console.log('Accepting Offer: ');
     console.log(Offer)
     this.FillOrder(Offer);
   }
 
+  // Fill order using 0x.js
   async FillOrder(Offer){
 
-    console.log('Filling Order...')
+    console.log('Filling Order...');
+
     const pe = new Web3ProviderEngine();
     pe.addProvider(new RPCSubprovider('http://127.0.0.1:8545'));
     pe.start();
 
     const contractWrappers = new ContractWrappers(pe, { networkId: 50 });
-    console.log('Filling Order 1...');
-    var acceptedSignedOrder = {
+
+    var acceptedSignedOrder = {                                                                 // Make sure offer received via API is in correct format for 0x
       exchangeAddress: Offer.signedOrder.exchangeAddress,
       makerAddress: Offer.signedOrder.makerAddress,
       takerAddress: Offer.signedOrder.takerAddress,
@@ -164,13 +180,12 @@ class App extends Component {
       signature: Offer.signedOrder.signature
     }
 
-    console.log(acceptedSignedOrder)
     // Fill the Order via 0x.js Exchange contract
     var txHash = await contractWrappers.exchange.fillOrderAsync(acceptedSignedOrder, acceptedSignedOrder.takerAssetAmount, this.state.accounts[0], {
         gasLimit: 400000,
     });
 
-    console.log('Order Filled??');
+    console.log('Order Filled');
     pe.stop();
 
     await this.LoadAccountInfo();
@@ -206,7 +221,7 @@ class App extends Component {
     var requests = <Alert variant='primary'>Activate Trading To See Token Requests - Someone Might Want Some of Yours!</Alert>
     if(isProxyApproved){
       requests = (filteredRequests.map(request =>
-        <Offer key={request.id} request={request} userTokens={userTokens} web3={this.state.web3} account={accounts[0]}/>
+        <Offer key={request.id} request={request} userTokens={userTokens} web3={this.state.web3} account={accounts[0]} refreshPage={this.refreshPage}/>
       ))
     }
 
@@ -236,7 +251,7 @@ class App extends Component {
             <Panel.Body>
               <div>
                 {challenges.map(challenge =>
-                  <Challenge key={challenge.name} challenge={challenge} tokenCounts={tokenCounts} userTokens={userTokens} web3={this.state.web3} account={accounts[0]} isProxyApproved={isProxyApproved} />
+                  <Challenge key={challenge.name} challenge={challenge} tokenCounts={tokenCounts} userTokens={userTokens} web3={this.state.web3} account={accounts[0]} isProxyApproved={isProxyApproved} refreshPage={this.refreshPage}/>
                 )}
               </div>
             </Panel.Body>
