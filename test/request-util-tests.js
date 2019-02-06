@@ -1,4 +1,4 @@
-import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByType, getFilteredRequestBookByName} from "../client/src/utils/request-helper";
+import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByType, getFilteredRequestBookByTypes} from "../client/src/utils/request-helper";
 
 const Card = artifacts.require("./Card.sol");
 
@@ -104,7 +104,7 @@ contract("Requests Util Tests...", accounts => {
   it("...should test getting filtered request book by name", async () => {
     const cardInstance = await Card.deployed();
 
-    var filteredRequests = await getFilteredRequestBookByName(requests, [{tokenOwner: 'Milk Man', tokenType: 'Coffee'}]);
+    var filteredRequests = await getFilteredRequestBookByTypes(requests, [{tokenOwner: 'Milk Man', tokenType: 'Coffee'}]);
 
     assert.equal(filteredRequests.length, 2);
     assert.equal(filteredRequests[0].tokenOwner, 'Milk Man');

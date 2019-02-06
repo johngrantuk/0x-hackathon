@@ -16,7 +16,7 @@ import { Web3Wrapper } from '@0x/web3-wrapper';
 import { MnemonicWalletSubprovider } from '@0x/subproviders';
 import { getContractAddressesForNetworkOrThrow } from '@0x/contract-addresses';
 
-import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByType, getFilteredRequestBookByName,
+import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByType, getFilteredRequestBookByTypes,
   parseHTTPOrder} from "../client/src/utils/request-helper";
 import { getTokens } from "../client/src/utils/contract-helper";
 
@@ -317,7 +317,7 @@ Offers received from relayer filtered by ID: -97049368 Now Has Two Offers:
 
     // client 2 without tokens matching doesn't see request
     // need to get list of tokenAdrresses and ids
-    response = await axios.get('http://localhost:3000/filteredrequestsbynames', {
+    response = await axios.get('http://localhost:3000/filteredrequestsbytypes', {
       params: {
         networkId: 50,
         tokens: [{tokenOwner: 'CocaCola', tokenType: 'Coke'}]
@@ -327,7 +327,7 @@ Offers received from relayer filtered by ID: -97049368 Now Has Two Offers:
     assert.equal(response.data.length, 0, 'Client2 Should See No Requests');
     console.log('Client2 Get Filter Requests Should Return None.');
 
-    var client3filteredRequests = await axios.get('http://localhost:3000/filteredrequestsbynames', {
+    var client3filteredRequests = await axios.get('http://localhost:3000/filteredrequestsbytypes', {
       params: {
         networkId: 50,
         tokens: [{tokenOwner: 'MilkMan', tokenType: 'Milk'}, {tokenOwner: 'Costa', tokenType: 'Tea'}]
@@ -340,7 +340,7 @@ Offers received from relayer filtered by ID: -97049368 Now Has Two Offers:
     assert.equal(client3filteredRequests.data.length, 1, 'Client3 Should See 1 Request');
     assert.equal(client3filteredRequests.data[0].id, relayRequestId, 'Request ID should match');
 
-    var client4filteredRequests = await axios.get('http://localhost:3000/filteredrequestsbynames', {
+    var client4filteredRequests = await axios.get('http://localhost:3000/filteredrequestsbytypes', {
       params: {
         networkId: 50,
         tokens: [{tokenOwner: 'MilkMan', tokenType: 'Milk'}, {tokenOwner: 'MilkMan', tokenType: 'Coffee'}, {tokenOwner: 'IrnBru', tokenType: 'IrnBru'}]

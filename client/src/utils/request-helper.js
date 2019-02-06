@@ -1,3 +1,5 @@
+var uuid = require('uuid');
+
 String.prototype.hashCode = function() {
   var hash = 0, i, chr;
   if (this.length === 0) return hash;
@@ -9,12 +11,13 @@ String.prototype.hashCode = function() {
   return hash;
 };
 
+// Adds a new Request to the reqest array. This would be implemented in a db in the future.
 const addRequest = async(RequestsArray, Request) => {
 
-  //var id = web3.utils.sha3(Request.requestTokenAddress + Request.requestTokenId + Request.requestAmount + Date.now());
-  var id = (Request.requestTokenAddress + Request.requestTokenId + Request.requestAmount + Date.now()).hashCode();
+  // var id = (Request.requestTokenAddress + Request.requestTokenId + Request.requestAmount + Date.now()).hashCode();
+  var id = uuid.v4();
 
-  RequestsArray.push({
+  var newRequest = {
     id: id,
     requestTokenAddress: Request.requestTokenAddress,
     requestTokenId: Request.requestTokenId,
@@ -22,31 +25,43 @@ const addRequest = async(RequestsArray, Request) => {
     requestSwaps: Request.swaps,
     tokenOwner: Request.tokenOwner,
     tokenType: Request.tokenType
-  });
+  }
+
+  console.log('Adding New Request To Relayer: ');
+  console.log(newRequest);
+
+  RequestsArray.push(newRequest);
 
   return id;
 }
-/*
-const getRequest = async(RequestsArray, Address, Id) => {
 
-  var request = RequestsArray.filter(request => {
-    console.log('Req ID: ' + request.id)
-    console.log('ID: ' + Id)
-    console.log(request.address)
-    console.log(Address)
-    console.log(request.id === Id && request.address === Address)
-    return request.id === Id && request.address === Address;
+// Retrieves all matching tokenTypes from RequestsArray.
+const getFilteredRequestBookByTypes = async(RequestsArray, Tokens) => {
+
+  var requests = RequestsArray.filter(request => {
+    var i;
+    for(i = 0;i < Tokens.length;i++){
+      if(Tokens[i].tokenOwner === request.tokenOwner && Tokens[i].tokenType === request.tokenType)
+        return true;
+    }
   });
 
-  if(request.length !== 1){
-    request = null;
-  }else {
-    request = request[0];
-  }
-
-  return request;
+  return requests;
 }
-*/
+
+// Adds new offer to Offers array. This would be db in the future.
+const addOffer = async(OffersArray, Order, SignedOrder, RequestId, Request, TakerTokens, MakerTokens) => {
+
+  OffersArray.push({
+    requestId: RequestId,
+    order: Order,
+    signedOrder: SignedOrder,
+    Request,
+    TakerTokens,
+    MakerTokens
+  });
+}
+
 const getRequest = async(RequestsArray, Id) => {
 
   var request = RequestsArray.filter(request => {
@@ -75,21 +90,7 @@ const getRequestByType = async(RequestsArray, Owner, TokenType) => {
   return requestResults;
 }
 
-const getFilteredRequestBookByName = async(RequestsArray, Tokens) => {
-  //console.log(Tokens)
-  //console.log(Tokens.length)
-  var requests = RequestsArray.filter(request => {
-    var i;
-    for(i = 0;i < Tokens.length;i++){
-      //console.log(Tokens[i].tokenOwner)
-      //console.log(request.tokenOwner)
-      if(Tokens[i].tokenOwner === request.tokenOwner && Tokens[i].tokenType === request.tokenType)
-        return true;
-    }
-  });
 
-  return requests;
-}
 
 const getFilteredRequestBook = async(RequestsArray, Tokens) => {
   var request = RequestsArray.filter(request => {
@@ -103,18 +104,8 @@ const getFilteredRequestBook = async(RequestsArray, Tokens) => {
   return request;
 }
 
-const addOffer = async(OffersArray, Order, SignedOrder, RequestId, Request, TakerTokens, MakerTokens) => {
 
-  OffersArray.push({
-    requestId: RequestId,
-    order: Order,
-    signedOrder: SignedOrder,
-    Request,
-    TakerTokens,
-    MakerTokens
-  });
-}
-
+// For /offers which is currently not used.
 const getFilteredOffersBook = async(OffersArray, RequestId) => {
 
   var offersArray = OffersArray.filter(offer => {
@@ -142,7 +133,7 @@ module.exports = {
   getFilteredRequestBook,
   addOffer,
   getFilteredOffersBook,
-  getFilteredRequestBookByName,
+  getFilteredRequestBookByTypes,
   parseHTTPOrder
 }
 //export addRequest;

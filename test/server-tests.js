@@ -1,4 +1,4 @@
-import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByType, getFilteredRequestBookByName} from "../client/src/utils/request-helper";
+import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByType, getFilteredRequestBookByTypes} from "../client/src/utils/request-helper";
 let axios = require('axios');
 const Card = artifacts.require("./Card.sol");
 
@@ -48,52 +48,11 @@ contract("Server Tests...", accounts => {
     assert.equal(response.status, 200);
   });
 
-  it("...should retrieve requests by type", async () => {
-    var response;
-
-    try{
-      response = await axios.get('http://localhost:3000/requestsbyname', {
-        params: {
-          networkId: 50,
-          tokenOwner: 'MilkMan',
-          tokenType: 'Coffee'}
-      });
-
-      console.log(response.data);
-    }
-    catch (e){
-      console.log(e);
-      console.log('Make Sure Local Relay Server Is Running')
-    }
-
-    assert.equal(response.status, 200);
-  });
-
-  it("...should retrieve request by ID", async () => {
-    var response;
-
-    try{
-      response = await axios.get('http://localhost:3000/requestbyid', {
-        params: {
-          networkId: 50,
-          requestId: id1}
-        });
-
-      console.log(response.data);
-    }
-    catch (e){
-      console.log(e);
-      console.log('Make Sure Local Relay Server Is Running')
-    }
-
-    assert.equal(response.status, 200);
-  });
-
   it("...should retrieve filtered request book by token names", async () => {
     var response;
 
     try{
-      response = await axios.get('http://localhost:3000/filteredrequestsbynames', {
+      response = await axios.get('http://localhost:3000/filteredrequestsbytypes', {
         params: {
           networkId: 50,
           tokens: [{tokenOwner: 'MilkMan', tokenType: 'Coffee'}, {tokenOwner: 'GreyFriars', tokenType: 'Bobby'}]
@@ -113,7 +72,7 @@ contract("Server Tests...", accounts => {
 
       response = await axios.post('http://localhost:3000/request?networkId=50', request);
 
-      response = await axios.get('http://localhost:3000/filteredrequestsbynames', {
+      response = await axios.get('http://localhost:3000/filteredrequestsbytypes', {
         params: {
           networkId: 50,
           tokens: [{tokenOwner: 'MilkMan', tokenType: 'Coffee'}, {tokenOwner: 'GreyFriars', tokenType: 'Bobby'}]

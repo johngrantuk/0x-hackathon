@@ -149,68 +149,13 @@ app.post('/v2/order', function (req, res) {
 
 
 /**
- * GET requestsbyname endpoint retrieves the requests matching tokenName
- * Extension added by JG for 0x Hackathon
- */
-app.get('/requestsbyname', async function (req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-    var networkIdRaw = req.query.networkId;
-    var tokenOwner = req.query.tokenOwner;
-    var tokenType = req.query.tokenType;
-
-    var networkId = parseInt(networkIdRaw, 10);
-
-    console.log('HTTP: GET requests by name: ' + tokenOwner + ': ' + tokenType);
-
-    if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
-        console.log("Incorrect Network ID: " + networkId);
-        res.status(HTTP_BAD_REQUEST_STATUS).send({});
-    }
-    else {
-        //var requestsByName = getRequestByType(requests, tokenOwner, tokenType);
-        var requestsByName = await requestHelper.getRequestByType(requests, tokenOwner, tokenType);
-        console.log(requestsByName);
-        res.status(HTTP_OK_STATUS).send(requestsByName);
-    }
-});
-
-/**
- * GET requestbyid endpoint retrieves the request matching ID
- * Extension added by JG for 0x Hackathon
- */
-app.get('/requestbyid', async function (req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-    var networkIdRaw = req.query.networkId;
-    var requestIdRaw = req.query.requestId;
-
-    var networkId = parseInt(networkIdRaw, 10);
-    var requestId = parseInt(requestIdRaw, 10);
-
-    console.log('HTTP: GET request by ID: ' + requestId);
-
-    if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
-        console.log("Incorrect Network ID: " + networkId);
-        res.status(HTTP_BAD_REQUEST_STATUS).send({});
-    }
-    else {
-        var request = await requestHelper.getRequest(requests, requestId);
-        res.status(HTTP_OK_STATUS).send(request);
-    }
-});
-
-/**
  * POST request endpoint submits a request to the Relayer.
+ * Currently the request is added to a requests array but this would be stored in a db in future.
  * Extension added by JG for 0x Hackathon
  */
 app.post('/request', async function (req, res) {
 
-    console.log('HTTP: POST request!');
+    console.log('\nHTTP POST: /request');
     var networkIdRaw = req.query.networkId;
 
     var networkId = parseInt(networkIdRaw, 10);
@@ -219,21 +164,16 @@ app.post('/request', async function (req, res) {
         res.status(HTTP_BAD_REQUEST_STATUS).send({});
     }
     else {
-      // console.log(req.body);
       var id = await requestHelper.addRequest(requests, req.body);
-      // var signedOrder = parseHTTPOrder(req.body);
-      // var orderHash = _0x_js_1.orderHashUtils.getOrderHashHex(signedOrder);
-      // ordersByHash[orderHash] = signedOrder;
-      // orders.push(signedOrder);
       res.status(200).send({id: id});
-      //res.status(HTTP_OK_STATUS).send({id: id});
     }
 });
+
 /**
- * GET requestbyid endpoint retrieves the request matching ID
+ * GET filteredrequestsbytypes endpoint retrieves all requests matching token types
  * Extension added by JG for 0x Hackathon
  */
-app.get('/filteredrequestsbynames', async function (req, res) {
+app.get('/filteredrequestsbytypes', async function (req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
 
     var networkIdRaw = req.query.networkId;
@@ -241,11 +181,7 @@ app.get('/filteredrequestsbynames', async function (req, res) {
 
     var networkId = parseInt(networkIdRaw, 10);
 
-    console.log('HTTP: GET filter request book by names: ');
-    console.log('Current Requests:');
-    console.log(requests);
-
-    console.log(tokens)
+    console.log('\nHTTP GET: /filteredrequestsbytypes: ');
 
     if(tokens === undefined){
       res.status(HTTP_OK_STATUS).send([]);
@@ -253,7 +189,7 @@ app.get('/filteredrequestsbynames', async function (req, res) {
     }
     //console.log(tokens);
     var tokenJson = tokens.map(token => JSON.parse(token));
-    console.log('Filters:')
+    console.log('Token Type Filters:')
     console.log(tokenJson)
 
     if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
@@ -261,68 +197,47 @@ app.get('/filteredrequestsbynames', async function (req, res) {
         res.status(HTTP_BAD_REQUEST_STATUS).send({});
     }
     else {
-        var filteredRequests = await requestHelper.getFilteredRequestBookByName(requests, tokenJson);
+        var filteredRequests = await requestHelper.getFilteredRequestBookByTypes(requests, tokenJson);
         console.log(filteredRequests)
         res.status(HTTP_OK_STATUS).send(filteredRequests);
     }
 });
+
 /**
- * POST offer endpoint submits an offer to the Relayer.
+ * POST offer endpoint submits a new offer to the Relayer.
+ * Currently the offer is added to an offers array but this would be stored in a db in future.
  * Extension added by JG for 0x Hackathon
  */
 app.post('/offer', async function (req, res) {
 
-  console.log(req.body)
-    var networkIdRaw = req.body.networkId;
+  console.log('\nHTTP POST: /offer');
 
-    var requestIdRaw = req.body.requestId;
-    var order = req.body.order;
-    var signedOrder = req.body.signedOrder;
+  var networkIdRaw = req.body.networkId;
+  var requestIdRaw = req.body.requestId;
+  var order = req.body.order;
+  var signedOrder = req.body.signedOrder;
 
-    var networkId = parseInt(networkIdRaw, 10);
-    var requestId = parseInt(requestIdRaw, 10);
-    var request = req.body.request;
-    var takerTokens = req.body.offers;
-    var makerTokens = req.body.makerTokens;
+  var networkId = parseInt(networkIdRaw, 10);
+  var requestId = parseInt(requestIdRaw, 10);
+  var request = req.body.request;
+  var takerTokens = req.body.offers;
+  var makerTokens = req.body.makerTokens;
 
-    console.log('HTTP: POST offer: ' + requestId);
-    if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
-        console.log("Incorrect Network ID: " + networkId);
-        res.status(HTTP_BAD_REQUEST_STATUS).send({});
-    }
-    else {
-      // console.log(req.body);
-      // var signedOrder = parseHTTPOrder(req.body);
-      await requestHelper.addOffer(offers, order, signedOrder, requestId, request, takerTokens, makerTokens);
-
-      res.status(HTTP_OK_STATUS).send({});
-    }
+  if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
+      console.log("Incorrect Network ID: " + networkId);
+      res.status(HTTP_BAD_REQUEST_STATUS).send({});
+  }
+  else {
+    console.log('Adding offer for requestId: ' + requestId);
+    await requestHelper.addOffer(offers, order, signedOrder, requestId, request, takerTokens, makerTokens);
+    res.status(HTTP_OK_STATUS).send({});
+  }
 });
+
+
 /**
- * GET offers endpoint retrieves the offers matching ID
- * Extension added by JG for 0x Hackathon
- */
-app.get('/offers', async function (req, res) {
-
-    var networkIdRaw = req.query.networkId;
-    var requestIdRaw = req.query.requestId;
-
-    var networkId = parseInt(networkIdRaw, 10);
-    var requestId = parseInt(requestIdRaw, 10);
-
-    console.log('HTTP: GET offers by requestID: ' + requestId);
-
-    if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
-        console.log("Incorrect Network ID: " + networkId);
-        res.status(HTTP_BAD_REQUEST_STATUS).send({});
-    }
-    else {
-        var filteredOffers = await requestHelper.getFilteredOffersBook(offers, requestId);
-        res.status(HTTP_OK_STATUS).send(filteredOffers);
-    }
-});
-/**
- * GET offers endpoint
+ * GET alloffers endpoint retreives all offers on Relayer
+ * Decided to show all offers instead of filtered offers as it could encorage more movement.
  * Extension added by JG for 0x Hackathon
  */
 app.get('/alloffers', async function (req, res) {
@@ -331,7 +246,7 @@ app.get('/alloffers', async function (req, res) {
 
     var networkId = parseInt(networkIdRaw, 10);
 
-    console.log('HTTP: GET alloffers...');
+    console.log('\nHTTP GET: /alloffers');
 
     if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
         console.log("Incorrect Network ID: " + networkId);
@@ -343,7 +258,8 @@ app.get('/alloffers', async function (req, res) {
 });
 
 /**
- * GET challenges
+ * GET challenges endpoint retrieves all challenges.
+ * Challenges are currently saved in a local array for demo but would move to db/blockchain
  * Extension added by JG for 0x Hackathon
  */
 app.get('/challenges', async function (req, res) {
@@ -364,7 +280,9 @@ app.get('/challenges', async function (req, res) {
 });
 
 /**
- * GET claim
+ * GET claim endpoint, allows a user to claim a reward from the reward owner, by Challenge ID.
+ * Creates a 0x order that claimee can fill.
+ * Probably a nicer/more efficient/safer way to do this but for now it works.
  * Extension added by JG for 0x Hackathon
  */
 app.get('/claim', async function (req, res) {
@@ -376,18 +294,15 @@ app.get('/claim', async function (req, res) {
     var networkId = parseInt(networkIdRaw, 10);
     claimId = parseInt(claimId, 10);
 
-    console.log('HTTP: GET claim for Challenge ID: ' + claimId);
-    // console.log(assetData);
+    console.log('\nHTTP GET: claim for Challenge ID: ' + claimId);
 
     if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
         console.log("Incorrect Network ID: " + networkId);
         res.status(HTTP_BAD_REQUEST_STATUS).send({});
     }
     else {
-      console.log('Generating Signed Order: ');
-
       let challenge;
-      for(var i = 0;i < challenges.length;i++){           // Find Challenge details
+      for(var i = 0;i < challenges.length;i++){           // Find Challenge details by ID
         if(challenges[i].id === claimId){
           challenge = challenges[i];
           break;
@@ -425,7 +340,7 @@ app.get('/claim', async function (req, res) {
           true,
       );
 
-      // Find token ID of matching prize: 'Free Coffee' for address
+      // Find token ID of matching prize: Again this is a cheat and would use contract, etc in future
       if(challenge.prize === 'Free Coffee')
         tokenId = 1;
       else if(challenge.prize === 'IrnBru Hunter'){
@@ -435,7 +350,7 @@ app.get('/claim', async function (req, res) {
         tokenId = 3;
       }
 
-
+      // Maker Asset - this is the 'Reward' token that the Challenge creator owns
       const makerAssetData = _0x_js_1.assetDataUtils.encodeERC721AssetData(contractAddress, tokenId);
 
       const randomExpiration = new _0x_js_1.BigNumber(Date.now() + 1000*60*10).div(1000).ceil();
@@ -447,19 +362,19 @@ app.get('/claim', async function (req, res) {
 
       // Create the order
       const order = {
-          exchangeAddress,
-          makerAddress: makerAddress.toLowerCase(),
-          takerAddress: NULL_ADDRESS,
-          senderAddress: NULL_ADDRESS,
-          feeRecipientAddress: NULL_ADDRESS,
-          expirationTimeSeconds: randomExpiration,
-          salt: _0x_js_1.generatePseudoRandomSalt(),
-          makerAssetAmount: new _0x_js_1.BigNumber(1),
-          takerAssetAmount: new _0x_js_1.BigNumber(1),
-          makerAssetData: makerAssetData,
-          takerAssetData: takerAssetData,
-          makerFee: ZERO,
-          takerFee: ZERO,
+        exchangeAddress,
+        makerAddress: makerAddress.toLowerCase(),
+        takerAddress: NULL_ADDRESS,
+        senderAddress: NULL_ADDRESS,
+        feeRecipientAddress: NULL_ADDRESS,
+        expirationTimeSeconds: randomExpiration,
+        salt: _0x_js_1.generatePseudoRandomSalt(),
+        makerAssetAmount: new _0x_js_1.BigNumber(1),
+        takerAssetAmount: new _0x_js_1.BigNumber(1),
+        makerAssetData: makerAssetData,
+        takerAssetData: takerAssetData,
+        makerFee: ZERO,
+        takerFee: ZERO,
       };
 
       const pe = new _0x_js_1.Web3ProviderEngine();
@@ -471,8 +386,34 @@ app.get('/claim', async function (req, res) {
       const signature = await _0x_js_1.signatureUtils.ecSignHashAsync(pe, orderHashHex, makerAddress.toLowerCase());
       const signedOrder = { ...order, signature: signature };
 
+      // Sends the signed order back to the user on the Dapp so they can fill it
       res.status(HTTP_OK_STATUS).send({signedOrder: signedOrder});
   }
+});
+
+/**
+ * NOT USED AS CURRENTLY SHOWING ALL OFFERS TO ENCORAGE LIQUIDITY
+ * GET offers endpoint retrieves the offers matching ID
+ * Extension added by JG for 0x Hackathon
+ */
+app.get('/offers', async function (req, res) {
+
+    var networkIdRaw = req.query.networkId;
+    var requestIdRaw = req.query.requestId;
+
+    var networkId = parseInt(networkIdRaw, 10);
+    var requestId = parseInt(requestIdRaw, 10);
+
+    console.log('HTTP: GET offers by requestID: ' + requestId);
+
+    if (networkId !== configs_1.NETWORK_CONFIGS.networkId) {
+        console.log("Incorrect Network ID: " + networkId);
+        res.status(HTTP_BAD_REQUEST_STATUS).send({});
+    }
+    else {
+        var filteredOffers = await requestHelper.getFilteredOffersBook(offers, requestId);
+        res.status(HTTP_OK_STATUS).send(filteredOffers);
+    }
 });
 
 

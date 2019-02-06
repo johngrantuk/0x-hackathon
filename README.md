@@ -13,7 +13,12 @@ To make this even more interesting the Dapp allows users to make requests for NF
 ## Relayer
 Based on the 0x-starter-project partial relayer example.
 Extended the endpoints to enable users to make requests and offers for tokens.
-* GET, /requestsbyname - retrieves the requests matching tokenName ??????
+* POST, /request - Submits a request to the Relayer. Currently the request is added to a requests array but this would be stored in a db in future.
+* GET, /filteredrequestsbytypes - Retrieves all requests matching token types.
+* POST, /offer - Submits a new offer to the Relayer. Currently the offer is added to an offers array but this would be stored in a db in future.
+* GET, /alloffers - alloffers endpoint retreives all offers on Relayer.
+* GET, /challenges - retrieves all challenges.
+* GET, /claim - allows a user to cliam a reward from the reward owner. Creates a 0x order that claimee can fill.
 
 Code is under ./client/relayer.
 

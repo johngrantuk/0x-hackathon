@@ -14,7 +14,7 @@ import { Web3Wrapper } from '@0x/web3-wrapper';
 import { MnemonicWalletSubprovider } from '@0x/subproviders';
 import { getContractAddressesForNetworkOrThrow } from '@0x/contract-addresses';
 
-import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByType, getFilteredRequestBookByName} from "../client/src/utils/request-helper";
+import { addRequest, getRequest, getFilteredRequestBook, addOffer, getFilteredOffersBook, getRequestByType, getFilteredRequestBookByTypes} from "../client/src/utils/request-helper";
 import { getTokens } from "../client/src/utils/contract-helper";
 
 const Card = artifacts.require("./Card.sol");

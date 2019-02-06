@@ -93,7 +93,7 @@ class App extends Component {
 
     var challenges = await axios.get('http://localhost:3000/challenges', { params: { networkId: networkId}});   // Gets Challenges for tokens matching users tokens
 
-    var filteredRequests = await axios.get('http://localhost:3000/filteredrequestsbynames', {                   // Get Requests for tokens matching users tokens
+    var filteredRequests = await axios.get('http://localhost:3000/filteredrequestsbytypes', {                   // Get Requests for tokens matching users tokens
       params: {
         networkId: networkId,
         tokens: tokenFilter
