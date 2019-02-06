@@ -9,28 +9,42 @@ To make this even more interesting the Dapp allows users to make requests for NF
 
 # The Parts
 
-
-## Relayer
-Based on the 0x-starter-project partial relayer example.
-Extended the endpoints to enable users to make requests and offers for tokens.
-* POST, /request - Submits a request to the Relayer. Currently the request is added to a requests array but this would be stored in a db in future.
-* GET, /filteredrequestsbytypes - Retrieves all requests matching token types.
-* POST, /offer - Submits a new offer to the Relayer. Currently the offer is added to an offers array but this would be stored in a db in future.
-* GET, /alloffers - alloffers endpoint retreives all offers on Relayer.
-* GET, /challenges - retrieves all challenges.
-* GET, /claim - allows a user to cliam a reward from the reward owner. Creates a 0x order that claimee can fill.
-
-Code is under ./client/relayer.
-
 ## Dapp
 
-React app using web3 and various 0x libraries.
-Time was limited but possible additions would include:
+Time was limited so it's very much (an ugly) MVP to build out the Reward exchange and user trading functionality using the 0x protocol but I believe the app could grow much further. I worked a bit on Austin Griffiths [Burner Wallet](https://github.com/austintgriffith/burner-wallet) and I believe following this example of an easy to use web based wallet functionality with an initial ephemeral private key can drive initial adoption and ease on-boarding (i.e. no initial mention of crypto, just scan the QR on your coffee and start claiming rewards). Enabling 'Challenge/Reward' type incentives and trading between users using 0x gets people coming back for more and could drive mass adoption.
+
+Obvious next steps are:
+
+* Design!
 * UI page for users to create a challenge.
 * Add QR scanner functionality to enable scanning of purchases to claim NFTs. i.e. a user buys a coffee which has a QR code that allows the user to claim the NFT.
 * Add metatransactions so that a new user can be on-boarded easily. Once they have some NFTs and see potential requests this would encourage them to 'upgrade' to a proper Web3 browser.
 
+
+## Relayer
+Based on the 0x-starter-project partial relayer example.
+I extended the endpoints to enable users to make requests and offers for tokens (NFTs) and claim rewards (NFTs).
+* POST, /request - Submits a request to the Relayer. Currently the request is added to a local requests array but this would be stored in a db in future.
+* GET, /filteredrequestsbytypes - Retrieves all requests matching token types.
+* POST, /offer - Submits a new offer to the Relayer. The offer contrains a 0x signed order. Currently the offer is added to a local offers array but this would be stored in a db in future.
+* GET, /alloffers - alloffers endpoint retrieves all offers stored by Relayer.
+* GET, /challenges - retrieves all challenges.
+* GET, /claim - allows a user to claim a reward from the reward owner. This is done by creating a 0x signed order that is returned to the claimer so they can fill.
+
+Code is under ./client/relayer.
+
 ## 0x
+
+[erc721 token wrapper](https://0x.org/docs/contract-wrappers#ERC721TokenWrapper-setApprovalForAllAsync):
+* [setProxyApprovalForAllAsync](https://0x.org/docs/contract-wrappers#ERC721TokenWrapper-setApprovalForAllAsync) to approve Dapp and Relayer.
+
+[0x.js](https://0x.org/docs/0x.js) Javascript library for interacting with the 0x protocol:
+* [assetDataUtils.encodeERC721AssetData](https://0x.org/docs/0x.js#assetDataUtils-encodeERC721AssetData) to encode an ERC721 token address into a hex encoded assetData string, usable in the makerAssetData or takerAssetData fields in a 0x order.
+* [assetDataUtils.encodeMultiAssetData](https://0x.org/docs/0x.js#assetDataUtils-encodeMultiAssetData)to encodes assetData (produced from above) for multiple AssetProxies into a single hex encoded assetData string, usable in the makerAssetData or takerAssetData fields in a 0x order.
+* [orderHashUtils.getOrderHashHex](https://0x.org/docs/0x.js#orderHashUtils-getOrderHashHex) and [signatureUtils.ecSignHashAsync](https://0x.org/docs/0x.js#signatureUtils-ecSignOrderAsync) to sign 0x orders, i.e. user offers and challenge rewards.
+
+[Exchange wrapper](https://0x.org/docs/contract-wrappers) to interact with the 0x Exchange smart contract:
+* [fillOrderAsync](https://0x.org/docs/contract-wrappers#ERC721TokenWrapper-setApprovalForAllAsync) to allow the Dapp to fill offers or challenges which are 0x signed orders.
 
 
 
